@@ -12015,6 +12015,10 @@ iconify-icon {
   background-color: #cccccc;
 }
 
+.table-custom td[data-label=Modified],
+.table-custom td[data-label="Modified By"] {
+  color: #6b6b6b;
+}
 .table-custom tr {
   cursor: pointer;
 }
