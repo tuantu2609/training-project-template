@@ -22,8 +22,16 @@ iconify-icon {
   color: $ms-excel-green;
 }
 
+.icon-word {
+  color: $ms-word-blue;
+}
+
 .icon-head {
   color: $ms-primary-pink;
+}
+
+.mobile-icon {
+    display: none;
 }
 
 .navbar-nav .nav-link:hover {
@@ -65,6 +73,13 @@ iconify-icon {
   }
 
   @media (max-width: 768px) {
+    .desktop-icon {
+        display: none;
+    }
+
+    .mobile-icon {
+        display: inline-block;
+    }
     thead {
       display: none;
     }
