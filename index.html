@@ -1,8 +1,127 @@
+<!DOCTYPE html>
 <html>
-	<head>
 
-	</head>
-	<body>
-		
-	</body>
+<head>
+	<link rel="stylesheet" href="./dist/css/home-page.css">
+	<script src="https://code.iconify.design/iconify-icon/1.0.8/iconify-icon.min.js"></script>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body>
+	<nav class="navbar navbar-expand-lg navbar-light bg-light">
+		<div class="container-fluid">
+			<button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse"
+				data-bs-target="#navbarSupportedContent">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+			<div class="collapse navbar-collapse" id="navbarSupportedContent">
+				<ul class="navbar-nav mb-2 mb-lg-0">
+					<li class="nav-item">
+						<a class="nav-link" href="#"><iconify-icon icon="clarity:add-line"
+								class="me-2 icon-head"></iconify-icon></i>New<iconify-icon icon="mdi-light:chevron-down"
+								class="ms-2"></iconify-icon></a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="#"><iconify-icon icon="fluent:arrow-upload-24-regular"
+								class="me-2 icon-head"></iconify-icon>Upload<iconify-icon icon="mdi-light:chevron-down"
+								class="ms-2"></iconify-icon></a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="#"><iconify-icon icon="fluent-mdl2:sync-to-p-c"
+								class="me-2 icon-head"></iconify-icon>Sync</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="#"><iconify-icon icon="vscode-icons:file-type-excel2"
+								class="me-2"></iconify-icon>Export to Excel</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="#"><iconify-icon icon="fluent-mdl2:flow"
+								class="me-2 icon-head"></iconify-icon>Flow<iconify-icon icon="mdi-light:chevron-down"
+								class="ms-2"></iconify-icon></a>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</nav>
+	<div class="container-fluid mt-3">
+		<h1 class="mt-4 ms-3">Documents</h1>
+		<div class="px-4">
+			<table class="table table-custom table-hover">
+				<thead>
+					<tr>
+						<th><iconify-icon icon="fluent:document-24-light"></iconify-icon></th>
+						<th>Name<iconify-icon icon="mdi-light:chevron-down" class="ms-2"></iconify-icon></th>
+						<th>Modified<iconify-icon icon="mdi-light:chevron-down" class="ms-2"></iconify-icon></th>
+						<th>Modified By<iconify-icon icon="mdi-light:chevron-down" class="ms-2"></iconify-icon></th>
+						<th><iconify-icon icon="clarity:add-line" class="me-2"></iconify-icon>Add column</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td data-label="File Type"><iconify-icon icon="fxemoji:folder"
+								class="icon-folder"></iconify-icon></td>
+						<td data-label="Name" class="td-name">CAS</td>
+						<td data-label="Modified">April 30</td>
+						<td data-label="Modified By">Megan Bowen</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td data-label="File Type"><iconify-icon icon="uiw:file-excel"
+								class="icon-excel"></iconify-icon></td>
+						<td data-label="Name" class="td-name">
+							<span class="name-value">
+								<iconify-icon icon="fluent-mdl2:glimmer" class="name-icon"></iconify-icon>
+								CoasterAndBargeLoading.xlsx
+							</span>
+						</td>
+						<td data-label="Modified">A few seconds ago</td>
+						<td data-label="Modified By">Administrator MOD</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td data-label="File Type"><iconify-icon icon="uiw:file-excel"
+								class="icon-excel"></iconify-icon></td>
+						<td data-label="Name" class="td-name">
+							<span class="name-value">
+								<iconify-icon icon="fluent-mdl2:glimmer" class="name-icon"></iconify-icon>
+								RevenueByServices.xlsx
+							</span>
+						</td>
+						<td data-label="Modified">A few seconds ago</td>
+						<td data-label="Modified By">Administrator MOD</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td data-label="File Type"><iconify-icon icon="uiw:file-excel"
+								class="icon-excel"></iconify-icon></td>
+						<td data-label="Name" class="td-name">
+							<span class="name-value">
+								<iconify-icon icon="fluent-mdl2:glimmer" class="name-icon"></iconify-icon>
+								RevenueByServices2016.xlsx
+							</span>
+						</td>
+						<td data-label="Modified">A few seconds ago</td>
+						<td data-label="Modified By">Administrator MOD</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td data-label="File Type"><iconify-icon icon="uiw:file-excel"
+								class="icon-excel"></iconify-icon></td>
+						<td data-label="Name" class="td-name">
+							<span class="name-value">
+								<iconify-icon icon="fluent-mdl2:glimmer" class="name-icon"></iconify-icon>
+								RevenueByServices2017.xlsx
+							</span>
+						</td>
+						<td data-label="Modified">A few seconds ago</td>
+						<td data-label="Modified By">Administrator MOD</td>
+						<td></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+	<script src="./dist/js/home-page.js"></script>
+</body>
+
 </html>

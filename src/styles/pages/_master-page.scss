@@ -2,6 +2,7 @@
 @import '../utilities/variables';
 @import '../utilities/functions';
 @import '../utilities/mixins';
+@import '../utilities/fonts';
 
 @import '../base/reset';
 @import '../base/typography';
@@ -13,3 +14,5 @@
 @import '../layout/forms';
 
 @import '../components/buttons';
+
+@import "~bootstrap/scss/bootstrap";

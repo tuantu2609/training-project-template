@@ -1,2 +1,106 @@
 // Home page styles
 @import "master-page";
+
+body {
+  font-family: $ms-font-family;
+  font-size: 1rem;
+}
+
+iconify-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  font-size: 1.2rem;
+}
+
+.icon-folder {
+  filter: grayscale(100%) contrast(120%);
+}
+
+.icon-excel {
+  color: $ms-excel-green;
+}
+
+.icon-head {
+  color: $ms-primary-pink;
+}
+
+.navbar-nav .nav-link:hover {
+  background-color: #cccccc;
+}
+
+.table-custom {
+  tr {
+    cursor: pointer;
+  }
+  thead {
+    th {
+      font-weight: normal;
+
+      &:first-child {
+        text-align: right;
+      }
+    }
+  }
+
+  tbody {
+    td {
+      &:first-child {
+        text-align: right;
+      }
+    }
+  }
+
+  .td-name {
+    .name-value {
+      display: inline-flex;
+      align-items: center;
+    }
+    .name-icon {
+      font-size: 10px;
+      color: $ms-primary-pink;
+      transform: translateY(-6px);
+    }
+  }
+
+  @media (max-width: 768px) {
+    thead {
+      display: none;
+    }
+
+    tbody,
+    tr,
+    td {
+      display: block;
+      width: 100%;
+    }
+
+    tr {
+      margin-bottom: 32px;
+      border: 1px solid #e1dfdd;
+    }
+
+    td {
+      display: grid;
+      grid-template-columns: 35% 1fr;
+      word-break: break-word;
+    }
+
+    td::before {
+      content: attr(data-label);
+      font-weight: 600;
+      color: $ms-black;
+      font-style: italic;
+    }
+
+    td:first-child {
+      background: $ms-light-gray;
+      display: flex;
+      justify-content: space-between;
+    }
+    td:last-child {
+      display: none;
+    }
+  }
+}
