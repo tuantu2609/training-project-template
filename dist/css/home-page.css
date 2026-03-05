@@ -12067,7 +12067,7 @@ iconify-icon {
   }
   .table-custom td::before {
     content: attr(data-label);
-    font-weight: 600;
+    font-weight: bold;
     color: #000000;
     font-style: italic;
   }

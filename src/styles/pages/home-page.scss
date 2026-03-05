@@ -3,7 +3,7 @@
 
 body {
   font-family: $ms-font-family;
-  font-size: 1rem;
+  font-size: $font-size;
 }
 
 iconify-icon {
@@ -11,7 +11,7 @@ iconify-icon {
   align-items: center;
   justify-content: center;
   vertical-align: middle;
-  font-size: 1.2rem;
+  font-size: $icon-font-size;
 }
 
 .icon-folder {
@@ -35,7 +35,7 @@ iconify-icon {
 }
 
 .navbar-nav .nav-link:hover {
-  background-color: #cccccc;
+  background-color: $hover-color;
 }
 
 .table-custom {
@@ -104,7 +104,7 @@ iconify-icon {
 
     td::before {
       content: attr(data-label);
-      font-weight: 600;
+      font-weight: bold;
       color: $ms-black;
       font-style: italic;
     }
