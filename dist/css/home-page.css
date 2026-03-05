@@ -12011,10 +12011,6 @@ iconify-icon {
   color: #E3008C;
 }
 
-.mobile-icon {
-  display: none;
-}
-
 .navbar-nav .nav-link:hover {
   background-color: #cccccc;
 }
@@ -12024,6 +12020,9 @@ iconify-icon {
 }
 .table-custom thead th {
   font-weight: normal;
+}
+.table-custom thead th:hover {
+  background-color: #cccccc;
 }
 .table-custom thead th:first-child {
   text-align: right;
@@ -12041,12 +12040,6 @@ iconify-icon {
   transform: translateY(-6px);
 }
 @media (max-width: 768px) {
-  .table-custom .desktop-icon {
-    display: none;
-  }
-  .table-custom .mobile-icon {
-    display: inline-block;
-  }
   .table-custom thead {
     display: none;
   }

@@ -30,10 +30,6 @@ iconify-icon {
   color: $ms-primary-pink;
 }
 
-.mobile-icon {
-    display: none;
-}
-
 .navbar-nav .nav-link:hover {
   background-color: $hover-color;
 }
@@ -45,6 +41,10 @@ iconify-icon {
   thead {
     th {
       font-weight: normal;
+
+      &:hover {
+        background-color: $hover-color;
+      }
 
       &:first-child {
         text-align: right;
@@ -73,13 +73,6 @@ iconify-icon {
   }
 
   @media (max-width: 768px) {
-    .desktop-icon {
-        display: none;
-    }
-
-    .mobile-icon {
-        display: inline-block;
-    }
     thead {
       display: none;
     }
