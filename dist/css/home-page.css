@@ -79,7 +79,7 @@ iconify-icon {
     width: 100%;
   }
   .table-custom tr {
-    margin-bottom: 32px;
+    margin-bottom: 2rem;
     border: 1px solid #e1dfdd;
   }
   .table-custom td {
