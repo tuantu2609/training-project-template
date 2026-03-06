@@ -1,8 +1,4 @@
 .table-custom {
-  td[data-label='Modified'],
-  td[data-label='Modified By'] {
-    color: $font-color-light;
-  }
   tr {
     cursor: pointer;
   }
@@ -44,13 +40,16 @@
     }
   }
 
+  .td-content {
+    color: $font-color-light;
+  }
+
   @media (max-width: 768px) {
     thead {
       display: none;
     }
 
-    td[data-label='Modified'],
-    td[data-label='Modified By'] {
+    .td-content {
       color: black;
     }
 

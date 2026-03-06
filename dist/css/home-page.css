@@ -35,10 +35,6 @@ iconify-icon {
   color: #E3008C;
 }
 
-.table-custom td[data-label=Modified],
-.table-custom td[data-label="Modified By"] {
-  color: #6b6b6b;
-}
 .table-custom tr {
   cursor: pointer;
 }
@@ -66,12 +62,14 @@ iconify-icon {
   font-size: 10px;
   color: #E3008C;
 }
+.table-custom .td-content {
+  color: #6b6b6b;
+}
 @media (max-width: 768px) {
   .table-custom thead {
     display: none;
   }
-  .table-custom td[data-label=Modified],
-  .table-custom td[data-label="Modified By"] {
+  .table-custom .td-content {
     color: black;
   }
   .table-custom tbody,
