@@ -3,6 +3,10 @@
     cursor: pointer;
   }
   thead {
+    tr:first-child {
+      border-bottom: 1px solid #000000;
+    }
+
     th {
       font-weight: normal;
 

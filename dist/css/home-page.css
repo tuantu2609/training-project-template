@@ -38,6 +38,9 @@ iconify-icon {
 .table-custom tr {
   cursor: pointer;
 }
+.table-custom thead tr:first-child {
+  border-bottom: 1px solid #000000;
+}
 .table-custom thead th {
   font-weight: normal;
 }
