@@ -1,0 +1,23 @@
+iconify-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  font-size: $icon-font-size;
+}
+
+.icon-folder {
+  filter: grayscale(100%) contrast(120%);
+}
+
+.icon-excel {
+  color: $ms-excel-green;
+}
+
+.icon-word {
+  color: $ms-word-blue;
+}
+
+.icon-head {
+  color: $ms-primary-pink;
+}

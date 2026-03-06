@@ -2,6 +2,120 @@
   !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js!./node_modules/resolve-url-loader/index.js!./node_modules/sass-loader/dist/cjs.js??ruleSet[1].rules[2].use[4]!./src/styles/pages/home-page.scss ***!
   \*******************************************************************************************************************************************************************************************************************************************/
 @charset "UTF-8";
+body {
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  font-size: 1rem;
+}
+
+.navbar-nav .nav-link:hover {
+  background-color: #cccccc;
+}
+
+iconify-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  font-size: 1.2rem;
+}
+
+.icon-folder {
+  filter: grayscale(100%) contrast(120%);
+}
+
+.icon-excel {
+  color: #1d6f42;
+}
+
+.icon-word {
+  color: #2b579a;
+}
+
+.icon-head {
+  color: #E3008C;
+}
+
+.table-custom td[data-label=Modified],
+.table-custom td[data-label="Modified By"] {
+  color: #6b6b6b;
+}
+.table-custom tr {
+  cursor: pointer;
+}
+.table-custom thead th {
+  font-weight: normal;
+}
+.table-custom thead th:hover {
+  background-color: #cccccc;
+}
+.table-custom thead th:first-child {
+  text-align: right;
+}
+.table-custom tbody td:first-child {
+  text-align: right;
+}
+.table-custom .td-name .name-value {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+}
+.table-custom .td-name .name-icon {
+  position: absolute;
+  left: -0.5rem;
+  top: -0.2rem;
+  font-size: 10px;
+  color: #E3008C;
+}
+@media (max-width: 768px) {
+  .table-custom thead {
+    display: none;
+  }
+  .table-custom td[data-label=Modified],
+  .table-custom td[data-label="Modified By"] {
+    color: black;
+  }
+  .table-custom tbody,
+  .table-custom tr,
+  .table-custom td {
+    display: block;
+    width: 100%;
+  }
+  .table-custom tr {
+    margin-bottom: 32px;
+    border: 1px solid #e1dfdd;
+  }
+  .table-custom td {
+    display: grid;
+    grid-template-columns: 35% 1fr;
+    word-break: break-word;
+  }
+  .table-custom td::before {
+    content: attr(data-label);
+    font-weight: bold;
+    color: #323130;
+    font-style: italic;
+    font-family: Arial, sans-serif;
+  }
+  .table-custom td:first-child {
+    background: #f5f5f5;
+    display: flex;
+    justify-content: space-between;
+  }
+  .table-custom td:last-child {
+    display: none;
+  }
+  .table-custom .td-name .name-value {
+    display: inline-flex;
+    align-items: flex-start;
+    gap: 2px;
+  }
+  .table-custom .td-name .name-icon {
+    position: static;
+    font-size: 10px;
+    color: #E3008C;
+  }
+}
+
 /*!
  * Bootstrap  v5.3.8 (https://getbootstrap.com/)
  * Copyright 2011-2025 The Bootstrap Authors
@@ -11980,101 +12094,6 @@ textarea.form-control-lg {
   }
   .d-print-none {
     display: none !important;
-  }
-}
-body {
-  font-family: "Segoe UI", Tahoma, sans-serif;
-  font-size: 1rem;
-}
-
-iconify-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  vertical-align: middle;
-  font-size: 1.2rem;
-}
-
-.icon-folder {
-  filter: grayscale(100%) contrast(120%);
-}
-
-.icon-excel {
-  color: #1d6f42;
-}
-
-.icon-word {
-  color: #2b579a;
-}
-
-.icon-head {
-  color: #E3008C;
-}
-
-.navbar-nav .nav-link:hover {
-  background-color: #cccccc;
-}
-
-.table-custom td[data-label=Modified],
-.table-custom td[data-label="Modified By"] {
-  color: #6b6b6b;
-}
-.table-custom tr {
-  cursor: pointer;
-}
-.table-custom thead th {
-  font-weight: normal;
-}
-.table-custom thead th:hover {
-  background-color: #cccccc;
-}
-.table-custom thead th:first-child {
-  text-align: right;
-}
-.table-custom tbody td:first-child {
-  text-align: right;
-}
-.table-custom .td-name .name-value {
-  display: inline-flex;
-  align-items: center;
-}
-.table-custom .td-name .name-icon {
-  font-size: 10px;
-  color: #E3008C;
-  transform: translateY(-6px);
-}
-@media (max-width: 768px) {
-  .table-custom thead {
-    display: none;
-  }
-  .table-custom tbody,
-  .table-custom tr,
-  .table-custom td {
-    display: block;
-    width: 100%;
-  }
-  .table-custom tr {
-    margin-bottom: 32px;
-    border: 1px solid #e1dfdd;
-  }
-  .table-custom td {
-    display: grid;
-    grid-template-columns: 35% 1fr;
-    word-break: break-word;
-  }
-  .table-custom td::before {
-    content: attr(data-label);
-    font-weight: bold;
-    color: #000000;
-    font-style: italic;
-  }
-  .table-custom td:first-child {
-    background: #f5f5f5;
-    display: flex;
-    justify-content: space-between;
-  }
-  .table-custom td:last-child {
-    display: none;
   }
 }
 
