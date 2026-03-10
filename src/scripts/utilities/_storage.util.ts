@@ -16,3 +16,4 @@ export function getFromLocalStorage(): any {
   const data = localStorage.getItem(STORAGE_KEY);
   return data ? JSON.parse(data) : null;
 }
+

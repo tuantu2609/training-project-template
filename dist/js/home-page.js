@@ -7667,6 +7667,35 @@ function setLoading(elementId, loading, message = 'Loading...') {
 
 /***/ }),
 
+/***/ "./src/scripts/utilities/_storage.util.ts":
+/*!************************************************!*\
+  !*** ./src/scripts/utilities/_storage.util.ts ***!
+  \************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   getFromLocalStorage: function() { return /* binding */ getFromLocalStorage; },
+/* harmony export */   saveToLocalStorage: function() { return /* binding */ saveToLocalStorage; }
+/* harmony export */ });
+const STORAGE_KEY = 'documents';
+function saveToLocalStorage(data) {
+    const serializedData = JSON.stringify(data, (key, value) => {
+        if (key === 'parent') {
+            return undefined;
+        }
+        return value;
+    });
+    localStorage.setItem(STORAGE_KEY, serializedData);
+}
+function getFromLocalStorage() {
+    const data = localStorage.getItem(STORAGE_KEY);
+    return data ? JSON.parse(data) : null;
+}
+
+
+/***/ }),
+
 /***/ "./src/scripts/utilities/dialog.util.ts":
 /*!**********************************************!*\
   !*** ./src/scripts/utilities/dialog.util.ts ***!
@@ -7813,35 +7842,6 @@ function openFormDialog(title, fields, submitText = 'Save') {
 }
 
 
-/***/ }),
-
-/***/ "./src/scripts/utilities/local-storage.util.ts":
-/*!*****************************************************!*\
-  !*** ./src/scripts/utilities/local-storage.util.ts ***!
-  \*****************************************************/
-/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   getFromLocalStorage: function() { return /* binding */ getFromLocalStorage; },
-/* harmony export */   saveToLocalStorage: function() { return /* binding */ saveToLocalStorage; }
-/* harmony export */ });
-const STORAGE_KEY = 'documents';
-function saveToLocalStorage(data) {
-    const serializedData = JSON.stringify(data, (key, value) => {
-        if (key === 'parent') {
-            return undefined;
-        }
-        return value;
-    });
-    localStorage.setItem(STORAGE_KEY, serializedData);
-}
-function getFromLocalStorage() {
-    const data = localStorage.getItem(STORAGE_KEY);
-    return data ? JSON.parse(data) : null;
-}
-
-
 /***/ })
 
 /******/ 	});
@@ -7926,7 +7926,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _utilities_helper__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../utilities/_helper */ "./src/scripts/utilities/_helper.ts");
 /* harmony import */ var _components_grid__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../components/_grid */ "./src/scripts/components/_grid.ts");
 /* harmony import */ var _utilities_dialog_util__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../utilities/dialog.util */ "./src/scripts/utilities/dialog.util.ts");
-/* harmony import */ var _utilities_local_storage_util__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../utilities/local-storage.util */ "./src/scripts/utilities/local-storage.util.ts");
+/* harmony import */ var _utilities_storage_util__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../utilities/_storage.util */ "./src/scripts/utilities/_storage.util.ts");
 /* harmony import */ var _data_folder_data__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../data/folder.data */ "./src/scripts/data/folder.data.ts");
 
 
@@ -7952,13 +7952,13 @@ const renderNotFoundState = (folderId) => {
     (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.setLoading)('document-table-body', true, 'Loading documents...');
     try {
         await (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.delay)(1000);
-        const data = (0,_utilities_local_storage_util__WEBPACK_IMPORTED_MODULE_3__.getFromLocalStorage)();
+        const data = (0,_utilities_storage_util__WEBPACK_IMPORTED_MODULE_3__.getFromLocalStorage)();
         if (data) {
             rootFolder = data;
         }
         else {
             rootFolder = (0,_data_folder_data__WEBPACK_IMPORTED_MODULE_4__.createMockFolderData)();
-            (0,_utilities_local_storage_util__WEBPACK_IMPORTED_MODULE_3__.saveToLocalStorage)(rootFolder);
+            (0,_utilities_storage_util__WEBPACK_IMPORTED_MODULE_3__.saveToLocalStorage)(rootFolder);
         }
         rebuildParent(rootFolder, null);
         const currentURL = window.location.href;
@@ -8194,7 +8194,7 @@ async function createFolder() {
             modifiedBy: 'Current User',
         };
         currentFolder.subFolders.push(newFolder);
-        (0,_utilities_local_storage_util__WEBPACK_IMPORTED_MODULE_3__.saveToLocalStorage)(rootFolder);
+        (0,_utilities_storage_util__WEBPACK_IMPORTED_MODULE_3__.saveToLocalStorage)(rootFolder);
         (0,_components_grid__WEBPACK_IMPORTED_MODULE_1__["default"])(currentFolder);
     }
     finally {
@@ -8237,7 +8237,7 @@ async function createFile() {
             modifiedBy: 'Current User',
         };
         currentFolder.files.push(newFile);
-        (0,_utilities_local_storage_util__WEBPACK_IMPORTED_MODULE_3__.saveToLocalStorage)(rootFolder);
+        (0,_utilities_storage_util__WEBPACK_IMPORTED_MODULE_3__.saveToLocalStorage)(rootFolder);
         (0,_components_grid__WEBPACK_IMPORTED_MODULE_1__["default"])(currentFolder);
     }
     finally {
@@ -8265,7 +8265,7 @@ async function uploadFile(file) {
             modifiedBy: 'Current User',
         };
         currentFolder.files.push(newFile);
-        (0,_utilities_local_storage_util__WEBPACK_IMPORTED_MODULE_3__.saveToLocalStorage)(rootFolder);
+        (0,_utilities_storage_util__WEBPACK_IMPORTED_MODULE_3__.saveToLocalStorage)(rootFolder);
         (0,_components_grid__WEBPACK_IMPORTED_MODULE_1__["default"])(currentFolder);
     }
     finally {
@@ -8277,7 +8277,7 @@ async function deleteFolder(folderId) {
     try {
         await (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.delay)(500);
         currentFolder.subFolders = currentFolder.subFolders.filter((folder) => folder.id !== folderId);
-        (0,_utilities_local_storage_util__WEBPACK_IMPORTED_MODULE_3__.saveToLocalStorage)(rootFolder);
+        (0,_utilities_storage_util__WEBPACK_IMPORTED_MODULE_3__.saveToLocalStorage)(rootFolder);
         (0,_components_grid__WEBPACK_IMPORTED_MODULE_1__["default"])(currentFolder);
     }
     finally {
@@ -8289,7 +8289,7 @@ async function deleteFile(fileId) {
     try {
         await (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.delay)(500);
         currentFolder.files = currentFolder.files.filter((file) => file.id !== fileId);
-        (0,_utilities_local_storage_util__WEBPACK_IMPORTED_MODULE_3__.saveToLocalStorage)(rootFolder);
+        (0,_utilities_storage_util__WEBPACK_IMPORTED_MODULE_3__.saveToLocalStorage)(rootFolder);
         (0,_components_grid__WEBPACK_IMPORTED_MODULE_1__["default"])(currentFolder);
     }
     finally {
@@ -8323,7 +8323,7 @@ async function editFolderName(folderId) {
         folder.name = nextName;
         folder.modifiedAt = new Date().toISOString();
         folder.modifiedBy = 'Current User';
-        (0,_utilities_local_storage_util__WEBPACK_IMPORTED_MODULE_3__.saveToLocalStorage)(rootFolder);
+        (0,_utilities_storage_util__WEBPACK_IMPORTED_MODULE_3__.saveToLocalStorage)(rootFolder);
         (0,_components_grid__WEBPACK_IMPORTED_MODULE_1__["default"])(currentFolder);
     }
     finally {
@@ -8357,7 +8357,7 @@ async function editFileName(fileId) {
         file.name = nextName;
         file.modifiedAt = new Date().toISOString();
         file.modifiedBy = 'Current User';
-        (0,_utilities_local_storage_util__WEBPACK_IMPORTED_MODULE_3__.saveToLocalStorage)(rootFolder);
+        (0,_utilities_storage_util__WEBPACK_IMPORTED_MODULE_3__.saveToLocalStorage)(rootFolder);
         (0,_components_grid__WEBPACK_IMPORTED_MODULE_1__["default"])(currentFolder);
     }
     finally {

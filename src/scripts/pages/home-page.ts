@@ -9,7 +9,7 @@ import {
 import {
   saveToLocalStorage,
   getFromLocalStorage,
-} from '../utilities/local-storage.util';
+} from '../utilities/_storage.util';
 import { createMockFolderData } from '../data/folder.data';
 
 
