@@ -1,9 +1,23 @@
 .table-custom {
+  .row-select {
+    width: 1.1rem;
+    height: 1.1rem;
+    margin: 0;
+    cursor: pointer;
+    vertical-align: middle;
+  }
+
+  th,
+  td {
+    vertical-align: middle;
+  }
+
   tr {
     cursor: pointer;
   }
+
   thead {
-    tr:first-child {
+    tr {
       border-bottom: 1px solid #000000;
     }
 
@@ -13,16 +27,12 @@
       &:hover {
         background-color: $hover-color;
       }
-
-      &:first-child {
-        text-align: right;
-      }
     }
   }
 
   tbody {
     td {
-      &:first-child {
+      &:nth-child(2) {
         text-align: right;
       }
     }
@@ -49,6 +59,11 @@
   }
 
   @media (max-width: 768px) {
+    .row-select {
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+
     thead {
       display: none;
     }
@@ -83,7 +98,15 @@
       font-family: Arial, sans-serif;
     }
 
+    td.table-state-cell {
+      display: block !important;
+      width: 100%;
+    }
+
     td:first-child {
+      display: none;
+    }
+    td:nth-child(2) {
       background: $ms-light-gray;
       display: flex;
       justify-content: space-between;

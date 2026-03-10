@@ -16,13 +16,19 @@
 			</button>
 			<div class="collapse navbar-collapse" id="navbarSupportedContent">
 				<ul class="navbar-nav mb-2 mb-lg-0">
-					<li class="nav-item">
-						<a class="nav-link" href="#"><iconify-icon icon="clarity:add-line"
+					<li class="nav-item dropdown">
+						<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><iconify-icon icon="clarity:add-line"
 								class="me-2 icon-head"></iconify-icon></i>New<iconify-icon icon="mdi-light:chevron-down"
 								class="ms-2"></iconify-icon></a>
+						<ul class="dropdown-menu">
+							<li><a class="dropdown-item" href="#" id="create-folder-btn"><iconify-icon icon="mdi:create-new-folder-outline"
+								class="me-2 icon-head"></iconify-icon>Folder</a></li>
+							<li><a class="dropdown-item" href="#" id="create-file-btn"><iconify-icon icon="mdi:file-document-outline"
+								class="me-2 icon-head"></iconify-icon>File</a></li>
+						</ul>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link" href="#"><iconify-icon icon="fluent:arrow-upload-24-regular"
+						<a class="nav-link" href="#" id="upload-file-btn"><iconify-icon icon="fluent:arrow-upload-24-regular"
 								class="me-2 icon-head"></iconify-icon>Upload<iconify-icon icon="mdi-light:chevron-down"
 								class="ms-2"></iconify-icon></a>
 					</li>
@@ -49,12 +55,13 @@
 		</div>
 	</nav>
 	<div class="container-fluid mt-3">
-		<h1 class="mt-4 ms-4 mb-4 fw-light">Documents</h1>
+		<h1 class="mt-4 ms-4 mb-4 fw-light" id="document-breadcrumb-title">Documents</h1>
 		<div class="px-4">
 			<table class="table table-custom table-hover">
 				<thead>
 					<tr>
-						<th><iconify-icon icon="fluent:document-24-light"></iconify-icon></th>
+						<th style="width:40px"></th>
+						<th style="width:40px"><iconify-icon icon="fluent:document-24-light"></iconify-icon></th>
 						<th>Name<iconify-icon icon="mdi-light:chevron-down" class="ms-2"></iconify-icon></th>
 						<th>Modified<iconify-icon icon="mdi-light:chevron-down" class="ms-2"></iconify-icon></th>
 						<th>Modified By<iconify-icon icon="mdi-light:chevron-down" class="ms-2"></iconify-icon></th>
@@ -62,103 +69,12 @@
 					</tr>
 				</thead>
 				<tbody id="document-table-body">
-					<tr class="">
-						<td data-label="File Type">
-							<iconify-icon icon="fxemoji:folder" class="icon-folder"></iconify-icon>
-						</td>
-						<td data-label="Name" class="td-name">
-							<span class="name-value">
-								CAS
-							</span>
-						</td>
-						<td data-label="Modified" class="td-content">
-							April 30
-						</td>
-						<td data-label="Modified By" class="td-content">
-							Megan Bowen
-						</td>
-						<td></td>
-					</tr>
-
-					<tr>
-						<td data-label="File Type">
-							<iconify-icon icon="uiw:file-excel" class="icon-excel"></iconify-icon>
-						</td>
-						<td data-label="Name" class="td-name">
-							<span class="name-value">
-								<iconify-icon icon="fluent-mdl2:glimmer" class="name-icon"></iconify-icon>
-								CoasterAndBargeLoading.xlsx
-							</span>
-						</td>
-						<td data-label="Modified" class="td-content">
-							A few seconds ago
-						</td>
-						<td data-label="Modified By" class="td-content">
-							Administrator MOD
-						</td>
-						<td></td>
-					</tr>
-
-					<tr>
-						<td data-label="File Type">
-							<iconify-icon icon="uiw:file-excel" class="icon-excel"></iconify-icon>
-						</td>
-						<td data-label="Name" class="td-name">
-							<span class="name-value">
-								<iconify-icon icon="fluent-mdl2:glimmer" class="name-icon"></iconify-icon>
-								RevenueByServices.xlsx
-							</span>
-						</td>
-						<td data-label="Modified" class="td-content">
-							A few seconds ago
-						</td>
-						<td data-label="Modified By" class="td-content">
-							Administrator MOD
-						</td>
-						<td></td>
-					</tr>
-
-					<tr>
-						<td data-label="File Type">
-							<iconify-icon icon="uiw:file-excel" class="icon-excel"></iconify-icon>
-						</td>
-						<td data-label="Name" class="td-name">
-							<span class="name-value">
-								<iconify-icon icon="fluent-mdl2:glimmer" class="name-icon"></iconify-icon>
-								RevenueByServices2016.xlsx
-							</span>
-						</td>
-						<td data-label="Modified" class="td-content">
-							A few seconds ago
-						</td>
-						<td data-label="Modified By" class="td-content">
-							Administrator MOD
-						</td>
-						<td></td>
-					</tr>
-
-					<tr>
-						<td data-label="File Type">
-							<iconify-icon icon="uiw:file-excel" class="icon-excel"></iconify-icon>
-						</td>
-						<td data-label="Name" class="td-name">
-							<span class="name-value">
-								<iconify-icon icon="fluent-mdl2:glimmer" class="name-icon"></iconify-icon>
-								RevenueByServices2017.xlsx
-							</span>
-						</td>
-						<td data-label="Modified" class="td-content">
-							A few seconds ago
-						</td>
-						<td data-label="Modified By" class="td-content">
-							Administrator MOD
-						</td>
-						<td></td>
-					</tr>
 				</tbody>
 			</table>
 		</div>
 	</div>
+	<input type="file" id="file-input" hidden />
+	<input type="file" id="folder-input" webkitdirectory multiple hidden />
 	<script src="./dist/js/home-page.js"></script>
 </body>
 

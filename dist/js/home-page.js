@@ -7413,74 +7413,205 @@ defineJQueryPlugin(Toast);
 /***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
-const renderGrid = () => {
-    // TODO: implement code to Render grid
-    // const tbody = document.querySelector("#document-table-body");
-    //   const data = [
-    //   {
-    //     type: 'folder',
-    //     name: 'CAS',
-    //     modified: 'April 30',
-    //     modifiedBy: 'Megan Bowen',
-    //   },
-    //   {
-    //     type: 'excel',
-    //     name: 'CoasterAndBargeLoading.xlsx',
-    //     modified: 'A few seconds ago',
-    //     modifiedBy: 'Administrator MOD',
-    //   },
-    //   {
-    //     type: 'excel',
-    //     name: 'RevenueByServices.xlsx',
-    //     modified: 'A few seconds ago',
-    //     modifiedBy: 'Administrator MOD',
-    //   },
-    //   {
-    //     type: 'excel',
-    //     name: 'RevenueByServices2016.xlsx',
-    //     modified: 'A few seconds ago',
-    //     modifiedBy: 'Administrator MOD',
-    //   },
-    //   {
-    //     type: 'excel',
-    //     name: 'RevenueByServices2017.xlsx',
-    //     modified: 'A few seconds ago',
-    //     modifiedBy: 'Administrator MOD',
-    //   },
-    // ];
-    // const html = data.map(item => {
-    //   const icon =
-    //     item.type === "folder"
-    //       ? '<iconify-icon icon="fxemoji:folder" class="icon-folder"></iconify-icon>'
-    //       : '<iconify-icon icon="uiw:file-excel" class="icon-excel"></iconify-icon>';
-    //   const nameIcon =
-    //     item.type === "excel"
-    //       ? '<iconify-icon icon="fluent-mdl2:glimmer" class="name-icon"></iconify-icon>'
-    //       : '';
-    //   return `
-    //     <tr>
-    //       <td data-label="File Type">
-    //         ${icon}
-    //       </td>
-    //       <td data-label="Name" class="td-name">
-    //         <span class="name-value">
-    //           ${nameIcon}
-    //           ${item.name}
-    //         </span>
-    //       </td>
-    //       <td data-label="Modified">
-    //         ${item.modified}
-    //       </td>
-    //       <td data-label="Modified By">
-    //         ${item.modifiedBy}
-    //       </td>
-    //       <td></td>
-    //     </tr>
-    //   `;
-    // }).join("");
-    // tbody.innerHTML = html;
+const getFileIcon = (extension) => {
+    const ext = extension.toLowerCase();
+    if (['xls', 'xlsx', 'csv'].includes(ext))
+        return { name: 'uiw:file-excel', className: 'icon-excel' };
+    if (['doc', 'docx'].includes(ext))
+        return { name: 'vscode-icons:file-type-word', className: '' };
+    if (['ppt', 'pptx'].includes(ext))
+        return {
+            name: 'vscode-icons:file-type-powerpoint2',
+            className: '',
+        };
+    if (ext === 'pdf')
+        return { name: 'vscode-icons:file-type-pdf2', className: '' };
+    if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'].includes(ext)) {
+        return { name: 'lets-icons:img-box-fill', className: '' };
+    }
+    if (['zip', 'rar', '7z', 'tar', 'gz'].includes(ext)) {
+        return { name: 'vscode-icons:file-type-zip', className: '' };
+    }
+    return { name: 'mdi:file-outline', className: '' };
+};
+const formatDisplayDate = (value) => {
+    if (!value) {
+        return '';
+    }
+    const parsedDate = new Date(value);
+    if (Number.isNaN(parsedDate.getTime())) {
+        return value;
+    }
+    return parsedDate.toLocaleDateString('en-US', {
+        month: 'long',
+        day: 'numeric',
+    });
+};
+const renderGrid = (folder) => {
+    const tbody = document.getElementById('document-table-body');
+    if (!tbody)
+        return;
+    let body = '';
+    folder.subFolders.forEach((folder) => {
+        body += `
+      <tr class="folder-row" data-folder-id="${folder.id}">
+        <td>
+          <input type="checkbox" class="row-select">
+        </td>
+
+        <td data-label="File Type">
+          <iconify-icon icon="fxemoji:folder" class="icon-folder"></iconify-icon>
+        </td>
+
+        <td data-label="Name" class="td-name">
+          <span class="name-value">${folder.name}</span>
+        </td>
+
+        <td data-label="Modified" class="td-content">${formatDisplayDate(folder.modifiedAt)}</td>
+        <td data-label="Modified By" class="td-content">${folder.modifiedBy}</td>
+
+        <td class="text-end">
+          <button class="btn btn-sm btn-link text-success btn-edit"
+            data-folder-id="${folder.id}">
+            <iconify-icon icon="akar-icons:edit"></iconify-icon>
+          </button>
+
+          <button class="btn btn-sm btn-link text-danger btn-delete"
+            data-folder-id="${folder.id}">
+            <iconify-icon icon="mdi:delete-outline"></iconify-icon>
+          </button>
+        </td>
+      </tr>
+    `;
+    });
+    folder.files.forEach((file) => {
+        const icon = getFileIcon(file.extension);
+        body += `
+      <tr data-file-id="${file.id}">
+        <td>
+          <input type="checkbox" class="row-select">
+        </td>
+
+        <td data-label="File Type">
+          <iconify-icon icon="${icon.name}" class="${icon.className}"></iconify-icon>
+        </td>
+
+        <td data-label="Name" class="td-name">
+          <span class="name-value">
+          <iconify-icon icon="fluent-mdl2:glimmer" class="name-icon"></iconify-icon>
+            ${file.name}.${file.extension}
+          </span>
+        </td>
+
+        <td data-label="Modified" class="td-content">${formatDisplayDate(file.modifiedAt)}</td>
+        <td data-label="Modified By" class="td-content">${file.modifiedBy}</td>
+
+        <td class="text-end">
+          <button class="btn btn-sm btn-link text-success btn-edit"
+            data-file-id="${file.id}">
+            <iconify-icon icon="akar-icons:edit"></iconify-icon>
+          </button>
+
+          <button class="btn btn-sm btn-link text-danger btn-delete"
+            data-file-id="${file.id}">
+            <iconify-icon icon="mdi:delete-outline"></iconify-icon>
+          </button>
+        </td>
+      </tr>
+    `;
+    });
+    if (!folder.subFolders.length && !folder.files.length) {
+        body = `
+      <tr>
+        <td colspan="6" class="text-center py-4 text-muted table-state-cell">
+          This folder is empty.
+        </td>
+      </tr>
+    `;
+    }
+    tbody.innerHTML = body;
 };
 /* harmony default export */ __webpack_exports__["default"] = (renderGrid);
+
+
+/***/ }),
+
+/***/ "./src/scripts/data/folder.data.ts":
+/*!*****************************************!*\
+  !*** ./src/scripts/data/folder.data.ts ***!
+  \*****************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   createMockFolderData: function() { return /* binding */ createMockFolderData; }
+/* harmony export */ });
+const createMockFolderData = () => {
+    const nowIso = new Date().toISOString();
+    const april30Iso = new Date(new Date().getFullYear(), 3, 30).toISOString();
+    const root = {
+        id: 'root',
+        name: 'root',
+        parent: null,
+        createdAt: april30Iso,
+        createdBy: 'Admin',
+        modifiedAt: april30Iso,
+        modifiedBy: 'Admin',
+        files: [
+            {
+                id: 'file-1',
+                name: 'CoasterAndBargeLoading',
+                extension: 'xlsx',
+                createdAt: nowIso,
+                createdBy: 'Admin',
+                modifiedAt: nowIso,
+                modifiedBy: 'Administrator MOD',
+            },
+            {
+                id: 'file-2',
+                name: 'RevenueByServices',
+                extension: 'xlsx',
+                createdAt: nowIso,
+                createdBy: 'Admin',
+                modifiedAt: nowIso,
+                modifiedBy: 'Administrator MOD',
+            },
+        ],
+        subFolders: [],
+    };
+    const cas = {
+        id: 'folder-1',
+        name: 'CAS',
+        parent: root,
+        files: [
+            {
+                id: 'file-5',
+                name: 'RevenueByServices2016',
+                extension: 'xlsx',
+                createdAt: nowIso,
+                createdBy: 'Admin',
+                modifiedAt: nowIso,
+                modifiedBy: 'Administrator MOD',
+            },
+            {
+                id: 'file-6',
+                name: 'RevenueByServices2017',
+                extension: 'xlsx',
+                createdAt: nowIso,
+                createdBy: 'Admin',
+                modifiedAt: nowIso,
+                modifiedBy: 'Administrator MOD',
+            },
+        ],
+        subFolders: [],
+        createdAt: nowIso,
+        createdBy: 'Admin',
+        modifiedAt: april30Iso,
+        modifiedBy: 'Megan Bowen',
+    };
+    root.subFolders.push(cas);
+    return root;
+};
 
 
 /***/ }),
@@ -7492,6 +7623,10 @@ const renderGrid = () => {
 /***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   delay: function() { return /* binding */ delay; },
+/* harmony export */   setLoading: function() { return /* binding */ setLoading; }
+/* harmony export */ });
 const ready = (fn) => {
     if (document.readyState !== 'loading') {
         fn();
@@ -7501,6 +7636,210 @@ const ready = (fn) => {
     }
 };
 /* harmony default export */ __webpack_exports__["default"] = (ready);
+function delay(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+function setLoading(elementId, loading, message = 'Loading...') {
+    const element = document.getElementById(elementId);
+    if (!element)
+        return;
+    let loader = element.querySelector('.table-loader');
+    if (loading) {
+        if (!loader) {
+            loader = document.createElement('tr');
+            loader.className = 'table-loader';
+            loader.innerHTML = `
+        <td colspan="100%" class="text-center py-5 table-state-cell">
+          <div class="d-flex flex-column align-items-center">
+            <div class="spinner-border text-dark mb-2"></div>
+            <small class="text-muted">${message}</small>
+          </div>
+        </td>
+      `;
+            element.appendChild(loader);
+        }
+    }
+    else {
+        loader?.remove();
+    }
+}
+
+
+/***/ }),
+
+/***/ "./src/scripts/utilities/dialog.util.ts":
+/*!**********************************************!*\
+  !*** ./src/scripts/utilities/dialog.util.ts ***!
+  \**********************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   openConfirmDialog: function() { return /* binding */ openConfirmDialog; },
+/* harmony export */   openFormDialog: function() { return /* binding */ openFormDialog; }
+/* harmony export */ });
+/* harmony import */ var bootstrap__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! bootstrap */ "./node_modules/bootstrap/dist/js/bootstrap.esm.js");
+
+const { Modal } = __webpack_require__(/*! bootstrap */ "./node_modules/bootstrap/dist/js/bootstrap.esm.js");
+function openConfirmDialog(title, message, confirmText = 'OK') {
+    return new Promise((resolve) => {
+        const dialogId = `confirm-dialog-${crypto.randomUUID()}`;
+        let result = false;
+        const html = `
+    <div class="modal fade" id="${dialogId}">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+        <div class="modal-header">
+            <h5 class="modal-title">${title}</h5>
+            <button class="btn-close"></button>
+        </div>
+
+        <div class="modal-body">
+            <p>${message}</p>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn btn-light btn-cancel">Cancel</button>
+            <button class="btn btn-dark btn-confirm">${confirmText}</button>
+        </div>
+
+        </div>
+    </div>
+    </div>
+    `;
+        document.body.insertAdjacentHTML('beforeend', html);
+        const form = document.getElementById(dialogId);
+        const modal = new Modal(form);
+        const closeBtn = form.querySelector('.btn-close');
+        form
+            .querySelector('.btn-cancel')
+            ?.addEventListener('click', () => {
+            result = false;
+            modal.hide();
+        });
+        closeBtn?.addEventListener('click', () => {
+            result = false;
+            modal.hide();
+        });
+        form
+            .querySelector('.btn-confirm')
+            ?.addEventListener('click', () => {
+            result = true;
+            modal.hide();
+        });
+        form.addEventListener('hidden.bs.modal', () => {
+            form.remove();
+            resolve(result);
+        });
+        modal.show();
+    });
+}
+function openFormDialog(title, fields, submitText = 'Save') {
+    return new Promise((resolve) => {
+        const dialogId = `form-dialog-${crypto.randomUUID()}`;
+        let result = null;
+        const body = fields
+            .map((f) => `
+        <div class="mb-3">
+          <label class="form-label">${f.label}</label>
+          <input
+            class="form-control dialog-input"
+            data-name="${f.name}"
+            value="${f.value || ''}"
+            placeholder="${f.placeholder || ''}"
+          />
+        </div>
+      `)
+            .join('');
+        const html = `
+    <div class="modal fade" id="${dialogId}">
+      <div class="modal-dialog">
+        <div class="modal-content">
+
+          <div class="modal-header">
+            <h5 class="modal-title">${title}</h5>
+            <button class="btn-close"></button>
+          </div>
+
+          <div class="modal-body">
+            ${body}
+            <div class="text-danger small dialog-error d-none"></div>
+          </div>
+
+          <div class="modal-footer">
+            <button class="btn btn-light btn-cancel">Cancel</button>
+            <button class="btn btn-dark btn-submit">${submitText}</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+    `;
+        document.body.insertAdjacentHTML('beforeend', html);
+        const form = document.getElementById(dialogId);
+        const modal = new Modal(form);
+        const errorMessage = form.querySelector('.dialog-error');
+        form.querySelector('.btn-cancel')?.addEventListener('click', () => {
+            modal.hide();
+        });
+        form.querySelector('.btn-close')?.addEventListener('click', () => {
+            modal.hide();
+        });
+        form.querySelector('.btn-submit')?.addEventListener('click', () => {
+            const values = {};
+            const inputs = form.querySelectorAll('.dialog-input');
+            inputs.forEach((input) => {
+                values[input.dataset.name] = input.value.trim();
+            });
+            for (const field of fields) {
+                if (!values[field.name]) {
+                    if (errorMessage) {
+                        errorMessage.textContent = `${field.label} is required`;
+                        errorMessage.classList.remove('d-none');
+                    }
+                    return;
+                }
+            }
+            result = values;
+            modal.hide();
+        });
+        form.addEventListener('hidden.bs.modal', () => {
+            form.remove();
+            resolve(result);
+        });
+        modal.show();
+    });
+}
+
+
+/***/ }),
+
+/***/ "./src/scripts/utilities/local-storage.util.ts":
+/*!*****************************************************!*\
+  !*** ./src/scripts/utilities/local-storage.util.ts ***!
+  \*****************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   getFromLocalStorage: function() { return /* binding */ getFromLocalStorage; },
+/* harmony export */   saveToLocalStorage: function() { return /* binding */ saveToLocalStorage; }
+/* harmony export */ });
+const STORAGE_KEY = 'documents';
+function saveToLocalStorage(data) {
+    const serializedData = JSON.stringify(data, (key, value) => {
+        if (key === 'parent') {
+            return undefined;
+        }
+        return value;
+    });
+    localStorage.setItem(STORAGE_KEY, serializedData);
+}
+function getFromLocalStorage() {
+    const data = localStorage.getItem(STORAGE_KEY);
+    return data ? JSON.parse(data) : null;
+}
 
 
 /***/ })
@@ -7575,15 +7914,456 @@ var __webpack_exports__ = {};
   !*** ./src/scripts/pages/home-page.ts ***!
   \****************************************/
 __webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   createFile: function() { return /* binding */ createFile; },
+/* harmony export */   createFolder: function() { return /* binding */ createFolder; },
+/* harmony export */   deleteFile: function() { return /* binding */ deleteFile; },
+/* harmony export */   deleteFolder: function() { return /* binding */ deleteFolder; },
+/* harmony export */   editFileName: function() { return /* binding */ editFileName; },
+/* harmony export */   editFolderName: function() { return /* binding */ editFolderName; },
+/* harmony export */   uploadFile: function() { return /* binding */ uploadFile; }
+/* harmony export */ });
 /* harmony import */ var _utilities_helper__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../utilities/_helper */ "./src/scripts/utilities/_helper.ts");
 /* harmony import */ var _components_grid__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../components/_grid */ "./src/scripts/components/_grid.ts");
-/* harmony import */ var bootstrap__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! bootstrap */ "./node_modules/bootstrap/dist/js/bootstrap.esm.js");
+/* harmony import */ var _utilities_dialog_util__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../utilities/dialog.util */ "./src/scripts/utilities/dialog.util.ts");
+/* harmony import */ var _utilities_local_storage_util__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../utilities/local-storage.util */ "./src/scripts/utilities/local-storage.util.ts");
+/* harmony import */ var _data_folder_data__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../data/folder.data */ "./src/scripts/data/folder.data.ts");
 
 
 
-(0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__["default"])(() => {
-    (0,_components_grid__WEBPACK_IMPORTED_MODULE_1__["default"])();
+
+
+let rootFolder;
+let currentFolder;
+let folderStack = [];
+const renderNotFoundState = (folderId) => {
+    const tbody = document.getElementById('document-table-body');
+    if (!tbody)
+        return;
+    tbody.innerHTML = `
+    <tr>
+      <td colspan="6" class="text-center py-5 table-state-cell text-muted">
+        Folder "${folderId}" not found.
+      </td>
+    </tr>
+  `;
+};
+(0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__["default"])(async () => {
+    (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.setLoading)('document-table-body', true, 'Loading documents...');
+    try {
+        await (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.delay)(1000);
+        const data = (0,_utilities_local_storage_util__WEBPACK_IMPORTED_MODULE_3__.getFromLocalStorage)();
+        if (data) {
+            rootFolder = data;
+        }
+        else {
+            rootFolder = (0,_data_folder_data__WEBPACK_IMPORTED_MODULE_4__.createMockFolderData)();
+            (0,_utilities_local_storage_util__WEBPACK_IMPORTED_MODULE_3__.saveToLocalStorage)(rootFolder);
+        }
+        rebuildParent(rootFolder, null);
+        const currentURL = window.location.href;
+        const folderId = new URL(currentURL).searchParams.get('folder');
+        if (folderId) {
+            const folder = findFolderById(rootFolder, folderId);
+            if (!folder) {
+                folderStack = [rootFolder];
+                renderBreadcrumb();
+                renderNotFoundState(folderId);
+                bindActions();
+                return;
+            }
+            currentFolder = folder;
+        }
+        else {
+            currentFolder = rootFolder;
+        }
+        folderStack = getFolderPath(currentFolder) || [rootFolder];
+        renderBreadcrumb();
+        (0,_components_grid__WEBPACK_IMPORTED_MODULE_1__["default"])(currentFolder);
+        bindActions();
+    }
+    finally {
+        (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.setLoading)('document-table-body', false);
+    }
 });
+function bindActions() {
+    const createFolderButton = document.getElementById('create-folder-btn');
+    const createFileButton = document.getElementById('create-file-btn');
+    const uploadFileButton = document.getElementById('upload-file-btn');
+    const tableBody = document.getElementById('document-table-body');
+    const fileInput = document.getElementById('file-input');
+    createFolderButton?.addEventListener('click', async (event) => {
+        event.preventDefault();
+        await createFolder();
+    });
+    createFileButton?.addEventListener('click', async (event) => {
+        event.preventDefault();
+        await createFile();
+    });
+    uploadFileButton?.addEventListener('click', (event) => {
+        event.preventDefault();
+        fileInput?.click();
+    });
+    fileInput.addEventListener('change', () => {
+        const file = fileInput.files?.[0];
+        if (!file)
+            return;
+        uploadFile(file);
+        fileInput.value = '';
+    });
+    document.addEventListener('change', (e) => {
+        const checkbox = e.target;
+        if (!checkbox.classList.contains('row-select'))
+            return;
+        document.querySelectorAll('tr').forEach((row) => {
+            row.classList.remove('row-selected');
+        });
+        document
+            .querySelectorAll('.row-select')
+            .forEach((cb) => {
+            if (cb !== checkbox)
+                cb.checked = false;
+        });
+        if (checkbox.checked) {
+            checkbox.closest('tr')?.classList.add('row-selected');
+        }
+    });
+    tableBody?.addEventListener('click', async (event) => {
+        const target = event.target;
+        if (target.closest('.row-select')) {
+            return;
+        }
+        const btn = target.closest('.btn-delete');
+        const editBtn = target.closest('.btn-edit');
+        if (editBtn) {
+            const fileId = editBtn.dataset.fileId;
+            const folderId = editBtn.dataset.folderId;
+            if (fileId) {
+                await editFileName(fileId);
+            }
+            if (folderId) {
+                await editFolderName(folderId);
+            }
+            return;
+        }
+        if (btn) {
+            const fileId = btn.dataset.fileId;
+            const folderId = btn.dataset.folderId;
+            if (fileId) {
+                const confirmed = await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_2__.openConfirmDialog)('Delete File', 'Are you sure you want to delete this file?', 'Delete');
+                if (!confirmed)
+                    return;
+                await deleteFile(fileId);
+            }
+            if (folderId) {
+                const confirmed = await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_2__.openConfirmDialog)('Delete Folder', 'Are you sure you want to delete this folder?', 'Delete');
+                if (!confirmed)
+                    return;
+                await deleteFolder(folderId);
+            }
+            return;
+        }
+        const folderRow = target.closest('.folder-row');
+        if (folderRow) {
+            const folderId = folderRow.dataset.folderId;
+            await openFolder(folderId);
+        }
+    });
+}
+function rebuildParent(folder, parent = null) {
+    folder.parent = parent;
+    for (const sub of folder.subFolders) {
+        rebuildParent(sub, folder);
+    }
+}
+function findFolderById(folder, id) {
+    if (folder.id === id)
+        return folder;
+    for (const subFolder of folder.subFolders) {
+        const found = findFolderById(subFolder, id);
+        if (found)
+            return found;
+    }
+    return null;
+}
+function getFolderPath(folder) {
+    const path = [];
+    let current = folder;
+    while (current) {
+        path.unshift(current);
+        current = current.parent;
+    }
+    return path;
+}
+async function navigateToFolder(folder) {
+    (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.setLoading)('document-table-body', true, 'Opening folder...');
+    try {
+        await (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.delay)(500);
+        currentFolder = folder;
+        folderStack = getFolderPath(folder);
+        (0,_components_grid__WEBPACK_IMPORTED_MODULE_1__["default"])(currentFolder);
+        renderBreadcrumb();
+    }
+    finally {
+        (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.setLoading)('document-table-body', false);
+    }
+}
+window.addEventListener('popstate', async (event) => {
+    const folderId = event.state?.folderId;
+    if (!folderId) {
+        await navigateToFolder(rootFolder);
+        return;
+    }
+    const found = findFolderById(rootFolder, folderId);
+    if (!found) {
+        currentFolder = rootFolder;
+        folderStack = [rootFolder];
+        renderNotFoundState(folderId);
+        return;
+    }
+    await navigateToFolder(found);
+});
+async function openFolder(folderId) {
+    (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.setLoading)('document-table-body', true, 'Opening folder...');
+    const folder = currentFolder.subFolders.find((f) => f.id === folderId);
+    if (!folder)
+        return;
+    history.pushState({ folderId }, '', `?folder=${folderId}`);
+    await navigateToFolder(folder);
+}
+function renderBreadcrumb() {
+    const title = document.getElementById('document-breadcrumb-title');
+    if (!title)
+        return;
+    title.textContent = '';
+    folderStack.forEach((folder, index) => {
+        const label = folder.id === 'root' ? 'Documents' : folder.name;
+        if (index > 0) {
+            title.append(' > ');
+        }
+        const link = document.createElement('a');
+        link.href = '#';
+        link.className = 'text-reset text-decoration-none';
+        link.textContent = label;
+        link.onclick = async (e) => {
+            e.preventDefault();
+            history.pushState({ folderId: folder.id }, '', folder.id === 'root' ? '/' : `?folder=${folder.id}`);
+            await navigateToFolder(folder);
+        };
+        title.appendChild(link);
+    });
+}
+function isDuplicate(folder, name, extension, excludeId) {
+    const folderExists = folder.subFolders.some((f) => f.name === name && f.id !== excludeId);
+    if (folderExists)
+        return true;
+    const fileExists = folder.files.some((f) => f.name === name &&
+        (extension ? f.extension === extension : true) &&
+        f.id !== excludeId);
+    return fileExists;
+}
+async function createFolder() {
+    const result = await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_2__.openFormDialog)('Create Folder', [
+        {
+            name: 'folderName',
+            label: 'Folder Name',
+            placeholder: 'Enter folder name',
+        },
+    ], 'Create');
+    if (!result) {
+        return;
+    }
+    if (isDuplicate(currentFolder, result.folderName)) {
+        await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_2__.openConfirmDialog)('Duplicate Folder Name', 'A folder with this name already exists.', 'OK');
+        return;
+    }
+    const folderName = result.folderName;
+    (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.setLoading)('document-table-body', true, 'Creating folder...');
+    try {
+        await (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.delay)(1000);
+        const nowIso = new Date().toISOString();
+        const newFolder = {
+            id: crypto.randomUUID(),
+            name: folderName,
+            files: [],
+            parent: currentFolder,
+            subFolders: [],
+            createdAt: nowIso,
+            createdBy: 'Current User',
+            modifiedAt: nowIso,
+            modifiedBy: 'Current User',
+        };
+        currentFolder.subFolders.push(newFolder);
+        (0,_utilities_local_storage_util__WEBPACK_IMPORTED_MODULE_3__.saveToLocalStorage)(rootFolder);
+        (0,_components_grid__WEBPACK_IMPORTED_MODULE_1__["default"])(currentFolder);
+    }
+    finally {
+        (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.setLoading)('document-table-body', false);
+    }
+}
+async function createFile() {
+    const result = await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_2__.openFormDialog)('Create File', [
+        {
+            name: 'fileName',
+            label: 'File Name',
+            placeholder: 'Enter file name',
+        },
+        {
+            name: 'extension',
+            label: 'File Extension',
+            placeholder: 'xlsx, pdf, docx...',
+        },
+    ], 'Create');
+    if (!result) {
+        return;
+    }
+    if (isDuplicate(currentFolder, result.fileName, result.extension.replace('.', ''), result.id)) {
+        await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_2__.openConfirmDialog)('Duplicate File Name', 'A file with this name already exists.', 'OK');
+        return;
+    }
+    const fileName = result.fileName;
+    const extension = result.extension.replace('.', '');
+    (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.setLoading)('document-table-body', true, 'Creating file...');
+    try {
+        await (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.delay)(1000);
+        const nowIso = new Date().toISOString();
+        const newFile = {
+            id: crypto.randomUUID(),
+            name: fileName,
+            extension,
+            createdAt: nowIso,
+            createdBy: 'Current User',
+            modifiedAt: nowIso,
+            modifiedBy: 'Current User',
+        };
+        currentFolder.files.push(newFile);
+        (0,_utilities_local_storage_util__WEBPACK_IMPORTED_MODULE_3__.saveToLocalStorage)(rootFolder);
+        (0,_components_grid__WEBPACK_IMPORTED_MODULE_1__["default"])(currentFolder);
+    }
+    finally {
+        (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.setLoading)('document-table-body', false);
+    }
+}
+async function uploadFile(file) {
+    const extension = file.name.split('.').pop() || '';
+    const name = file.name.replace(`.${extension}`, '');
+    if (isDuplicate(currentFolder, name, extension)) {
+        await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_2__.openConfirmDialog)('Duplicate File Name', 'A file with this name already exists.', 'OK');
+        return;
+    }
+    (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.setLoading)('document-table-body', true, 'Uploading file...');
+    try {
+        await (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.delay)(1000);
+        const nowIso = new Date().toISOString();
+        const newFile = {
+            id: crypto.randomUUID(),
+            name: name,
+            extension,
+            createdAt: nowIso,
+            createdBy: 'Current User',
+            modifiedAt: nowIso,
+            modifiedBy: 'Current User',
+        };
+        currentFolder.files.push(newFile);
+        (0,_utilities_local_storage_util__WEBPACK_IMPORTED_MODULE_3__.saveToLocalStorage)(rootFolder);
+        (0,_components_grid__WEBPACK_IMPORTED_MODULE_1__["default"])(currentFolder);
+    }
+    finally {
+        (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.setLoading)('document-table-body', false);
+    }
+}
+async function deleteFolder(folderId) {
+    (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.setLoading)('document-table-body', true, 'Deleting folder...');
+    try {
+        await (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.delay)(500);
+        currentFolder.subFolders = currentFolder.subFolders.filter((folder) => folder.id !== folderId);
+        (0,_utilities_local_storage_util__WEBPACK_IMPORTED_MODULE_3__.saveToLocalStorage)(rootFolder);
+        (0,_components_grid__WEBPACK_IMPORTED_MODULE_1__["default"])(currentFolder);
+    }
+    finally {
+        (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.setLoading)('document-table-body', false);
+    }
+}
+async function deleteFile(fileId) {
+    (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.setLoading)('document-table-body', true, 'Deleting file...');
+    try {
+        await (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.delay)(500);
+        currentFolder.files = currentFolder.files.filter((file) => file.id !== fileId);
+        (0,_utilities_local_storage_util__WEBPACK_IMPORTED_MODULE_3__.saveToLocalStorage)(rootFolder);
+        (0,_components_grid__WEBPACK_IMPORTED_MODULE_1__["default"])(currentFolder);
+    }
+    finally {
+        (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.setLoading)('document-table-body', false);
+    }
+}
+async function editFolderName(folderId) {
+    const folder = currentFolder.subFolders.find((item) => item.id === folderId);
+    if (!folder) {
+        return;
+    }
+    const result = await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_2__.openFormDialog)('Rename Folder', [
+        {
+            name: 'folderName',
+            label: 'Folder Name',
+            value: folder.name,
+            placeholder: 'Enter folder name',
+        },
+    ], 'Save');
+    if (!result) {
+        return;
+    }
+    if (isDuplicate(currentFolder, result.folderName)) {
+        await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_2__.openConfirmDialog)('Duplicate Folder Name', 'A folder with this name already exists.', 'OK');
+        return;
+    }
+    const nextName = result.folderName;
+    (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.setLoading)('document-table-body', true, 'Renaming folder...');
+    try {
+        await (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.delay)(500);
+        folder.name = nextName;
+        folder.modifiedAt = new Date().toISOString();
+        folder.modifiedBy = 'Current User';
+        (0,_utilities_local_storage_util__WEBPACK_IMPORTED_MODULE_3__.saveToLocalStorage)(rootFolder);
+        (0,_components_grid__WEBPACK_IMPORTED_MODULE_1__["default"])(currentFolder);
+    }
+    finally {
+        (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.setLoading)('document-table-body', false);
+    }
+}
+async function editFileName(fileId) {
+    const file = currentFolder.files.find((item) => item.id === fileId);
+    if (!file) {
+        return;
+    }
+    const result = await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_2__.openFormDialog)('Rename File', [
+        {
+            name: 'fileName',
+            label: 'File Name',
+            value: file.name,
+            placeholder: 'Enter file name',
+        },
+    ], 'Save');
+    if (!result) {
+        return;
+    }
+    if (isDuplicate(currentFolder, result.fileName, result.extension, result.id)) {
+        await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_2__.openConfirmDialog)('Duplicate File Name', 'A file with this name already exists.', 'OK');
+        return;
+    }
+    const nextName = result.fileName;
+    (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.setLoading)('document-table-body', true, 'Renaming file...');
+    try {
+        await (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.delay)(500);
+        file.name = nextName;
+        file.modifiedAt = new Date().toISOString();
+        file.modifiedBy = 'Current User';
+        (0,_utilities_local_storage_util__WEBPACK_IMPORTED_MODULE_3__.saveToLocalStorage)(rootFolder);
+        (0,_components_grid__WEBPACK_IMPORTED_MODULE_1__["default"])(currentFolder);
+    }
+    finally {
+        (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.setLoading)('document-table-body', false);
+    }
+}
 
 }();
 // This entry needs to be wrapped in an IIFE because it needs to be isolated against other entry modules.

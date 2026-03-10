@@ -1,1 +1,17 @@
 // Button Styles
+.dropdown-toggle::after {
+  display: none !important;
+}
+
+.btn-delete {
+  visibility: hidden;
+}
+
+.btn-edit {
+  visibility: hidden;
+}
+
+.row-selected .btn-delete,
+.row-selected .btn-edit {
+  visibility: visible;
+}
