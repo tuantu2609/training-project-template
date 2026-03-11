@@ -7406,6 +7406,46 @@ defineJQueryPlugin(Toast);
 
 /***/ }),
 
+/***/ "./src/scripts/components/_breadcrumb.ts":
+/*!***********************************************!*\
+  !*** ./src/scripts/components/_breadcrumb.ts ***!
+  \***********************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   renderBreadcrumb: function() { return /* binding */ renderBreadcrumb; }
+/* harmony export */ });
+/* harmony import */ var _state_folder_state__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../state/folder.state */ "./src/scripts/state/folder.state.ts");
+/* harmony import */ var _navigation_folder_navigation__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../navigation/folder.navigation */ "./src/scripts/navigation/folder.navigation.ts");
+
+
+function renderBreadcrumb() {
+    const title = document.getElementById('document-breadcrumb-title');
+    if (!title)
+        return;
+    title.textContent = '';
+    _state_folder_state__WEBPACK_IMPORTED_MODULE_0__.folderState.folderStack.forEach((folder, index) => {
+        const label = folder.id === 'root' ? 'Documents' : folder.name;
+        if (index > 0) {
+            title.append(' > ');
+        }
+        const link = document.createElement('a');
+        link.href = '#';
+        link.className = 'text-reset text-decoration-none';
+        link.textContent = label;
+        link.onclick = async (e) => {
+            e.preventDefault();
+            history.pushState({ folderId: folder.id }, '', folder.id === 'root' ? '/' : `?folder=${folder.id}`);
+            await (0,_navigation_folder_navigation__WEBPACK_IMPORTED_MODULE_1__.navigateToFolder)(folder);
+        };
+        title.appendChild(link);
+    });
+}
+
+
+/***/ }),
+
 /***/ "./src/scripts/components/_grid.ts":
 /*!*****************************************!*\
   !*** ./src/scripts/components/_grid.ts ***!
@@ -7536,6 +7576,32 @@ const renderGrid = (folder) => {
 
 /***/ }),
 
+/***/ "./src/scripts/components/_not-found.ts":
+/*!**********************************************!*\
+  !*** ./src/scripts/components/_not-found.ts ***!
+  \**********************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   renderNotFoundState: function() { return /* binding */ renderNotFoundState; }
+/* harmony export */ });
+function renderNotFoundState(folderId) {
+    const tbody = document.getElementById('document-table-body');
+    if (!tbody)
+        return;
+    tbody.innerHTML = `
+    <tr>
+      <td colspan="6" class="text-center py-5 table-state-cell text-muted">
+        Folder "${folderId}" not found.
+      </td>
+    </tr>
+  `;
+}
+
+
+/***/ }),
+
 /***/ "./src/scripts/data/folder.data.ts":
 /*!*****************************************!*\
   !*** ./src/scripts/data/folder.data.ts ***!
@@ -7616,6 +7682,286 @@ const createMockFolderData = () => {
 
 /***/ }),
 
+/***/ "./src/scripts/navigation/folder.navigation.ts":
+/*!*****************************************************!*\
+  !*** ./src/scripts/navigation/folder.navigation.ts ***!
+  \*****************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   bindFolderPopState: function() { return /* binding */ bindFolderPopState; },
+/* harmony export */   navigateToFolder: function() { return /* binding */ navigateToFolder; }
+/* harmony export */ });
+/* harmony import */ var _state_folder_state__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../state/folder.state */ "./src/scripts/state/folder.state.ts");
+/* harmony import */ var _utilities_helper__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utilities/_helper */ "./src/scripts/utilities/_helper.ts");
+/* harmony import */ var _components_grid__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../components/_grid */ "./src/scripts/components/_grid.ts");
+/* harmony import */ var _components_breadcrumb__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../components/_breadcrumb */ "./src/scripts/components/_breadcrumb.ts");
+/* harmony import */ var _components_not_found__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../components/_not-found */ "./src/scripts/components/_not-found.ts");
+
+
+
+
+
+async function navigateToFolder(folder) {
+    _state_folder_state__WEBPACK_IMPORTED_MODULE_0__.folderState.currentFolder = folder;
+    _state_folder_state__WEBPACK_IMPORTED_MODULE_0__.folderState.folderStack = (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_1__.getFolderPath)(folder);
+    (0,_components_grid__WEBPACK_IMPORTED_MODULE_2__["default"])(folder);
+    (0,_components_breadcrumb__WEBPACK_IMPORTED_MODULE_3__.renderBreadcrumb)();
+}
+function bindFolderPopState() {
+    window.addEventListener('popstate', async (event) => {
+        const rootFolder = _state_folder_state__WEBPACK_IMPORTED_MODULE_0__.folderState.rootFolder;
+        if (!rootFolder)
+            return;
+        const folderId = event.state?.folderId;
+        if (!folderId) {
+            await navigateToFolder(rootFolder);
+            return;
+        }
+        const found = (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_1__.findFolderById)(rootFolder, folderId);
+        if (!found) {
+            _state_folder_state__WEBPACK_IMPORTED_MODULE_0__.folderState.currentFolder = rootFolder;
+            _state_folder_state__WEBPACK_IMPORTED_MODULE_0__.folderState.folderStack = [rootFolder];
+            (0,_components_not_found__WEBPACK_IMPORTED_MODULE_4__.renderNotFoundState)(folderId);
+            return;
+        }
+        await navigateToFolder(found);
+    });
+}
+
+
+/***/ }),
+
+/***/ "./src/scripts/services/folder.services.ts":
+/*!*************************************************!*\
+  !*** ./src/scripts/services/folder.services.ts ***!
+  \*************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   createFile: function() { return /* binding */ createFile; },
+/* harmony export */   createFolder: function() { return /* binding */ createFolder; },
+/* harmony export */   deleteFile: function() { return /* binding */ deleteFile; },
+/* harmony export */   deleteFolder: function() { return /* binding */ deleteFolder; },
+/* harmony export */   editFileName: function() { return /* binding */ editFileName; },
+/* harmony export */   editFolderName: function() { return /* binding */ editFolderName; },
+/* harmony export */   uploadFile: function() { return /* binding */ uploadFile; }
+/* harmony export */ });
+/* harmony import */ var _state_folder_state__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../state/folder.state */ "./src/scripts/state/folder.state.ts");
+/* harmony import */ var _components_grid__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../components/_grid */ "./src/scripts/components/_grid.ts");
+/* harmony import */ var _components_breadcrumb__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../components/_breadcrumb */ "./src/scripts/components/_breadcrumb.ts");
+/* harmony import */ var _utilities_helper__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../utilities/_helper */ "./src/scripts/utilities/_helper.ts");
+/* harmony import */ var _utilities_storage_util__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../utilities/_storage.util */ "./src/scripts/utilities/_storage.util.ts");
+/* harmony import */ var _utilities_dialog_util__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../utilities/dialog.util */ "./src/scripts/utilities/dialog.util.ts");
+
+
+
+
+
+
+const getCurrentFolder = () => _state_folder_state__WEBPACK_IMPORTED_MODULE_0__.folderState.currentFolder;
+const getRootFolder = () => _state_folder_state__WEBPACK_IMPORTED_MODULE_0__.folderState.rootFolder;
+async function createFolder() {
+    const currentFolder = getCurrentFolder();
+    const rootFolder = getRootFolder();
+    if (!currentFolder || !rootFolder)
+        return;
+    const result = await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_5__.openFormDialog)('Create Folder', [{ name: 'folderName', label: 'Folder Name', placeholder: 'Enter folder name' }], 'Create');
+    if (!result)
+        return;
+    if ((0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.isDuplicate)(currentFolder, result.folderName)) {
+        await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_5__.openConfirmDialog)('Duplicate Folder Name', 'A folder with this name already exists.', 'OK');
+        return;
+    }
+    (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.setLoading)('document-table-body', true, 'Creating folder...');
+    try {
+        await (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.delay)(500);
+        const nowIso = new Date().toISOString();
+        currentFolder.subFolders.push({
+            id: crypto.randomUUID(),
+            name: result.folderName,
+            files: [],
+            parent: currentFolder,
+            subFolders: [],
+            createdAt: nowIso,
+            createdBy: 'Current User',
+            modifiedAt: nowIso,
+            modifiedBy: 'Current User',
+        });
+        (0,_utilities_storage_util__WEBPACK_IMPORTED_MODULE_4__.saveToLocalStorage)(rootFolder);
+        (0,_components_grid__WEBPACK_IMPORTED_MODULE_1__["default"])(currentFolder);
+    }
+    finally {
+        (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.setLoading)('document-table-body', false);
+    }
+}
+async function createFile() {
+    const currentFolder = getCurrentFolder();
+    const rootFolder = getRootFolder();
+    if (!currentFolder || !rootFolder)
+        return;
+    const result = await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_5__.openFormDialog)('Create File', [
+        { name: 'fileName', label: 'File Name', placeholder: 'Enter file name' },
+        { name: 'extension', label: 'File Extension', placeholder: 'xlsx, pdf...' },
+    ], 'Create');
+    if (!result)
+        return;
+    const extension = result.extension.replace('.', '');
+    if ((0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.isDuplicate)(currentFolder, result.fileName, extension)) {
+        await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_5__.openConfirmDialog)('Duplicate File Name', 'A file with this name already exists.', 'OK');
+        return;
+    }
+    (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.setLoading)('document-table-body', true, 'Creating file...');
+    try {
+        await (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.delay)(500);
+        const nowIso = new Date().toISOString();
+        const newFile = {
+            id: crypto.randomUUID(),
+            name: result.fileName,
+            extension,
+            createdAt: nowIso,
+            createdBy: 'Current User',
+            modifiedAt: nowIso,
+            modifiedBy: 'Current User',
+        };
+        currentFolder.files.push(newFile);
+        (0,_utilities_storage_util__WEBPACK_IMPORTED_MODULE_4__.saveToLocalStorage)(rootFolder);
+        (0,_components_grid__WEBPACK_IMPORTED_MODULE_1__["default"])(currentFolder);
+    }
+    finally {
+        (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.setLoading)('document-table-body', false);
+    }
+}
+async function deleteFile(fileId) {
+    const currentFolder = getCurrentFolder();
+    const rootFolder = getRootFolder();
+    if (!currentFolder || !rootFolder)
+        return;
+    (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.setLoading)('document-table-body', true, 'Deleting file...');
+    try {
+        await (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.delay)(300);
+        currentFolder.files = currentFolder.files.filter((file) => file.id !== fileId);
+        (0,_utilities_storage_util__WEBPACK_IMPORTED_MODULE_4__.saveToLocalStorage)(rootFolder);
+        (0,_components_grid__WEBPACK_IMPORTED_MODULE_1__["default"])(currentFolder);
+    }
+    finally {
+        (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.setLoading)('document-table-body', false);
+    }
+}
+async function deleteFolder(folderId) {
+    const currentFolder = getCurrentFolder();
+    const rootFolder = getRootFolder();
+    if (!currentFolder || !rootFolder)
+        return;
+    (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.setLoading)('document-table-body', true, 'Deleting folder...');
+    try {
+        await (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.delay)(300);
+        currentFolder.subFolders = currentFolder.subFolders.filter((folder) => folder.id !== folderId);
+        (0,_utilities_storage_util__WEBPACK_IMPORTED_MODULE_4__.saveToLocalStorage)(rootFolder);
+        (0,_components_grid__WEBPACK_IMPORTED_MODULE_1__["default"])(currentFolder);
+    }
+    finally {
+        (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.setLoading)('document-table-body', false);
+    }
+}
+async function editFolderName(folderId) {
+    const currentFolder = getCurrentFolder();
+    const rootFolder = getRootFolder();
+    if (!currentFolder || !rootFolder)
+        return;
+    const folder = currentFolder.subFolders.find(f => f.id === folderId);
+    if (!folder)
+        return;
+    const result = await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_5__.openFormDialog)('Rename Folder', [{ name: 'folderName', label: 'Folder Name', value: folder.name }], 'Save');
+    if (!result)
+        return;
+    if ((0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.isDuplicate)(currentFolder, result.folderName, undefined, folder.id)) {
+        await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_5__.openConfirmDialog)('Duplicate Folder Name', 'A folder with this name already exists.', 'OK');
+        return;
+    }
+    folder.name = result.folderName;
+    folder.modifiedAt = new Date().toISOString();
+    (0,_utilities_storage_util__WEBPACK_IMPORTED_MODULE_4__.saveToLocalStorage)(rootFolder);
+    (0,_components_grid__WEBPACK_IMPORTED_MODULE_1__["default"])(currentFolder);
+    (0,_components_breadcrumb__WEBPACK_IMPORTED_MODULE_2__.renderBreadcrumb)();
+}
+async function editFileName(fileId) {
+    const currentFolder = getCurrentFolder();
+    const rootFolder = getRootFolder();
+    if (!currentFolder || !rootFolder)
+        return;
+    const file = currentFolder.files.find(f => f.id === fileId);
+    if (!file)
+        return;
+    const result = await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_5__.openFormDialog)('Rename File', [{ name: 'fileName', label: 'File Name', value: file.name }], 'Save');
+    if (!result)
+        return;
+    if ((0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.isDuplicate)(currentFolder, result.fileName, file.extension, file.id)) {
+        await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_5__.openConfirmDialog)('Duplicate File Name', 'A file with this name already exists.', 'OK');
+        return;
+    }
+    file.name = result.fileName;
+    file.modifiedAt = new Date().toISOString();
+    (0,_utilities_storage_util__WEBPACK_IMPORTED_MODULE_4__.saveToLocalStorage)(rootFolder);
+    (0,_components_grid__WEBPACK_IMPORTED_MODULE_1__["default"])(currentFolder);
+}
+async function uploadFile(file) {
+    const currentFolder = getCurrentFolder();
+    const rootFolder = getRootFolder();
+    if (!currentFolder || !rootFolder)
+        return;
+    const extension = file.name.split('.').pop() || '';
+    const name = file.name.replace(`.${extension}`, '');
+    if ((0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.isDuplicate)(currentFolder, name, extension)) {
+        await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_5__.openConfirmDialog)('Duplicate File Name', 'A file with this name already exists.', 'OK');
+        return;
+    }
+    (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.setLoading)('document-table-body', true, 'Uploading file...');
+    try {
+        await (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.delay)(500);
+        const nowIso = new Date().toISOString();
+        const newFile = {
+            id: crypto.randomUUID(),
+            name,
+            extension,
+            createdAt: nowIso,
+            createdBy: 'Current User',
+            modifiedAt: nowIso,
+            modifiedBy: 'Current User',
+        };
+        currentFolder.files.push(newFile);
+        (0,_utilities_storage_util__WEBPACK_IMPORTED_MODULE_4__.saveToLocalStorage)(rootFolder);
+        (0,_components_grid__WEBPACK_IMPORTED_MODULE_1__["default"])(currentFolder);
+    }
+    finally {
+        (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.setLoading)('document-table-body', false);
+    }
+}
+
+
+/***/ }),
+
+/***/ "./src/scripts/state/folder.state.ts":
+/*!*******************************************!*\
+  !*** ./src/scripts/state/folder.state.ts ***!
+  \*******************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   folderState: function() { return /* binding */ folderState; }
+/* harmony export */ });
+const folderState = {
+    rootFolder: null,
+    currentFolder: null,
+    folderStack: [],
+};
+
+
+/***/ }),
+
 /***/ "./src/scripts/utilities/_helper.ts":
 /*!******************************************!*\
   !*** ./src/scripts/utilities/_helper.ts ***!
@@ -7625,6 +7971,10 @@ const createMockFolderData = () => {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   delay: function() { return /* binding */ delay; },
+/* harmony export */   findFolderById: function() { return /* binding */ findFolderById; },
+/* harmony export */   getFolderPath: function() { return /* binding */ getFolderPath; },
+/* harmony export */   isDuplicate: function() { return /* binding */ isDuplicate; },
+/* harmony export */   rebuildParent: function() { return /* binding */ rebuildParent; },
 /* harmony export */   setLoading: function() { return /* binding */ setLoading; }
 /* harmony export */ });
 const ready = (fn) => {
@@ -7645,23 +7995,55 @@ function setLoading(elementId, loading, message = 'Loading...') {
         return;
     let loader = element.querySelector('.table-loader');
     if (loading) {
-        if (!loader) {
-            loader = document.createElement('tr');
-            loader.className = 'table-loader';
-            loader.innerHTML = `
-        <td colspan="100%" class="text-center py-5 table-state-cell">
-          <div class="d-flex flex-column align-items-center">
-            <div class="spinner-border text-dark mb-2"></div>
-            <small class="text-muted">${message}</small>
-          </div>
-        </td>
-      `;
-            element.appendChild(loader);
-        }
+        element.innerHTML = '';
+        loader = document.createElement('tr');
+        loader.className = 'table-loader';
+        loader.innerHTML = `
+      <td colspan="100%" class="text-center py-5 table-state-cell">
+        <div class="d-flex flex-column align-items-center">
+          <div class="spinner-border text-dark mb-2"></div>
+          <small class="text-muted">${message}</small>
+        </div>
+      </td>
+    `;
+        element.appendChild(loader);
     }
     else {
         loader?.remove();
     }
+}
+function rebuildParent(folder, parent = null) {
+    folder.parent = parent;
+    for (const sub of folder.subFolders) {
+        rebuildParent(sub, folder);
+    }
+}
+function findFolderById(folder, id) {
+    if (folder.id === id)
+        return folder;
+    for (const subFolder of folder.subFolders) {
+        const found = findFolderById(subFolder, id);
+        if (found)
+            return found;
+    }
+    return null;
+}
+function getFolderPath(folder) {
+    const path = [];
+    let current = folder;
+    while (current) {
+        path.unshift(current);
+        current = current.parent;
+    }
+    return path;
+}
+function isDuplicate(folder, name, extension, excludeId) {
+    if (extension === undefined) {
+        return folder.subFolders.some((f) => f.name === name && f.id !== excludeId);
+    }
+    return folder.files.some((f) => f.name === name &&
+        f.extension === extension &&
+        f.id !== excludeId);
 }
 
 
@@ -7914,73 +8296,59 @@ var __webpack_exports__ = {};
   !*** ./src/scripts/pages/home-page.ts ***!
   \****************************************/
 __webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   createFile: function() { return /* binding */ createFile; },
-/* harmony export */   createFolder: function() { return /* binding */ createFolder; },
-/* harmony export */   deleteFile: function() { return /* binding */ deleteFile; },
-/* harmony export */   deleteFolder: function() { return /* binding */ deleteFolder; },
-/* harmony export */   editFileName: function() { return /* binding */ editFileName; },
-/* harmony export */   editFolderName: function() { return /* binding */ editFolderName; },
-/* harmony export */   uploadFile: function() { return /* binding */ uploadFile; }
-/* harmony export */ });
 /* harmony import */ var _utilities_helper__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../utilities/_helper */ "./src/scripts/utilities/_helper.ts");
-/* harmony import */ var _components_grid__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../components/_grid */ "./src/scripts/components/_grid.ts");
+/* harmony import */ var _utilities_storage_util__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utilities/_storage.util */ "./src/scripts/utilities/_storage.util.ts");
 /* harmony import */ var _utilities_dialog_util__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../utilities/dialog.util */ "./src/scripts/utilities/dialog.util.ts");
-/* harmony import */ var _utilities_storage_util__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../utilities/_storage.util */ "./src/scripts/utilities/_storage.util.ts");
-/* harmony import */ var _data_folder_data__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../data/folder.data */ "./src/scripts/data/folder.data.ts");
+/* harmony import */ var _data_folder_data__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../data/folder.data */ "./src/scripts/data/folder.data.ts");
+/* harmony import */ var _state_folder_state__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../state/folder.state */ "./src/scripts/state/folder.state.ts");
+/* harmony import */ var _navigation_folder_navigation__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../navigation/folder.navigation */ "./src/scripts/navigation/folder.navigation.ts");
+/* harmony import */ var _services_folder_services__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../services/folder.services */ "./src/scripts/services/folder.services.ts");
+/* harmony import */ var _components_breadcrumb__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../components/_breadcrumb */ "./src/scripts/components/_breadcrumb.ts");
+/* harmony import */ var _components_not_found__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../components/_not-found */ "./src/scripts/components/_not-found.ts");
 
 
 
 
 
-let rootFolder;
-let currentFolder;
-let folderStack = [];
-const renderNotFoundState = (folderId) => {
-    const tbody = document.getElementById('document-table-body');
-    if (!tbody)
-        return;
-    tbody.innerHTML = `
-    <tr>
-      <td colspan="6" class="text-center py-5 table-state-cell text-muted">
-        Folder "${folderId}" not found.
-      </td>
-    </tr>
-  `;
+
+
+
+
+const getCurrentFolder = () => {
+    return _state_folder_state__WEBPACK_IMPORTED_MODULE_4__.folderState.currentFolder;
+};
+const getRootFolder = () => {
+    return _state_folder_state__WEBPACK_IMPORTED_MODULE_4__.folderState.rootFolder;
 };
 (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__["default"])(async () => {
     (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.setLoading)('document-table-body', true, 'Loading documents...');
     try {
         await (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.delay)(1000);
-        const data = (0,_utilities_storage_util__WEBPACK_IMPORTED_MODULE_3__.getFromLocalStorage)();
-        if (data) {
-            rootFolder = data;
+        const data = (0,_utilities_storage_util__WEBPACK_IMPORTED_MODULE_1__.getFromLocalStorage)();
+        _state_folder_state__WEBPACK_IMPORTED_MODULE_4__.folderState.rootFolder = data || (0,_data_folder_data__WEBPACK_IMPORTED_MODULE_3__.createMockFolderData)();
+        if (!data) {
+            (0,_utilities_storage_util__WEBPACK_IMPORTED_MODULE_1__.saveToLocalStorage)(_state_folder_state__WEBPACK_IMPORTED_MODULE_4__.folderState.rootFolder);
         }
-        else {
-            rootFolder = (0,_data_folder_data__WEBPACK_IMPORTED_MODULE_4__.createMockFolderData)();
-            (0,_utilities_storage_util__WEBPACK_IMPORTED_MODULE_3__.saveToLocalStorage)(rootFolder);
-        }
-        rebuildParent(rootFolder, null);
-        const currentURL = window.location.href;
-        const folderId = new URL(currentURL).searchParams.get('folder');
+        (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.rebuildParent)(_state_folder_state__WEBPACK_IMPORTED_MODULE_4__.folderState.rootFolder, null);
+        const folderId = new URL(window.location.href).searchParams.get('folder');
         if (folderId) {
-            const folder = findFolderById(rootFolder, folderId);
+            const folder = (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.findFolderById)(_state_folder_state__WEBPACK_IMPORTED_MODULE_4__.folderState.rootFolder, folderId);
             if (!folder) {
-                folderStack = [rootFolder];
-                renderBreadcrumb();
-                renderNotFoundState(folderId);
+                _state_folder_state__WEBPACK_IMPORTED_MODULE_4__.folderState.currentFolder = _state_folder_state__WEBPACK_IMPORTED_MODULE_4__.folderState.rootFolder;
+                _state_folder_state__WEBPACK_IMPORTED_MODULE_4__.folderState.folderStack = [_state_folder_state__WEBPACK_IMPORTED_MODULE_4__.folderState.rootFolder];
+                (0,_components_breadcrumb__WEBPACK_IMPORTED_MODULE_7__.renderBreadcrumb)();
+                (0,_components_not_found__WEBPACK_IMPORTED_MODULE_8__.renderNotFoundState)(folderId);
                 bindActions();
                 return;
             }
-            currentFolder = folder;
+            _state_folder_state__WEBPACK_IMPORTED_MODULE_4__.folderState.currentFolder = folder;
         }
         else {
-            currentFolder = rootFolder;
+            _state_folder_state__WEBPACK_IMPORTED_MODULE_4__.folderState.currentFolder = _state_folder_state__WEBPACK_IMPORTED_MODULE_4__.folderState.rootFolder;
         }
-        folderStack = getFolderPath(currentFolder) || [rootFolder];
-        renderBreadcrumb();
-        (0,_components_grid__WEBPACK_IMPORTED_MODULE_1__["default"])(currentFolder);
+        await (0,_navigation_folder_navigation__WEBPACK_IMPORTED_MODULE_5__.navigateToFolder)(_state_folder_state__WEBPACK_IMPORTED_MODULE_4__.folderState.currentFolder);
         bindActions();
+        (0,_navigation_folder_navigation__WEBPACK_IMPORTED_MODULE_5__.bindFolderPopState)();
     }
     finally {
         (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.setLoading)('document-table-body', false);
@@ -7994,28 +8362,28 @@ function bindActions() {
     const fileInput = document.getElementById('file-input');
     createFolderButton?.addEventListener('click', async (event) => {
         event.preventDefault();
-        await createFolder();
+        await (0,_services_folder_services__WEBPACK_IMPORTED_MODULE_6__.createFolder)();
     });
     createFileButton?.addEventListener('click', async (event) => {
         event.preventDefault();
-        await createFile();
+        await (0,_services_folder_services__WEBPACK_IMPORTED_MODULE_6__.createFile)();
     });
     uploadFileButton?.addEventListener('click', (event) => {
         event.preventDefault();
         fileInput?.click();
     });
-    fileInput.addEventListener('change', () => {
+    fileInput?.addEventListener('change', () => {
         const file = fileInput.files?.[0];
         if (!file)
             return;
-        uploadFile(file);
+        void (0,_services_folder_services__WEBPACK_IMPORTED_MODULE_6__.uploadFile)(file);
         fileInput.value = '';
     });
     document.addEventListener('change', (e) => {
         const checkbox = e.target;
         if (!checkbox.classList.contains('row-select'))
             return;
-        document.querySelectorAll('tr').forEach((row) => {
+        tableBody?.querySelectorAll('tr').forEach((row) => {
             row.classList.remove('row-selected');
         });
         document
@@ -8033,332 +8401,54 @@ function bindActions() {
         if (target.closest('.row-select')) {
             return;
         }
-        const btn = target.closest('.btn-delete');
+        const deleteBtn = target.closest('.btn-delete');
         const editBtn = target.closest('.btn-edit');
         if (editBtn) {
             const fileId = editBtn.dataset.fileId;
             const folderId = editBtn.dataset.folderId;
             if (fileId) {
-                await editFileName(fileId);
+                await (0,_services_folder_services__WEBPACK_IMPORTED_MODULE_6__.editFileName)(fileId);
             }
             if (folderId) {
-                await editFolderName(folderId);
+                await (0,_services_folder_services__WEBPACK_IMPORTED_MODULE_6__.editFolderName)(folderId);
             }
             return;
         }
-        if (btn) {
-            const fileId = btn.dataset.fileId;
-            const folderId = btn.dataset.folderId;
+        if (deleteBtn) {
+            const fileId = deleteBtn.dataset.fileId;
+            const folderId = deleteBtn.dataset.folderId;
             if (fileId) {
                 const confirmed = await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_2__.openConfirmDialog)('Delete File', 'Are you sure you want to delete this file?', 'Delete');
                 if (!confirmed)
                     return;
-                await deleteFile(fileId);
+                await (0,_services_folder_services__WEBPACK_IMPORTED_MODULE_6__.deleteFile)(fileId);
             }
             if (folderId) {
                 const confirmed = await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_2__.openConfirmDialog)('Delete Folder', 'Are you sure you want to delete this folder?', 'Delete');
                 if (!confirmed)
                     return;
-                await deleteFolder(folderId);
+                await (0,_services_folder_services__WEBPACK_IMPORTED_MODULE_6__.deleteFolder)(folderId);
             }
             return;
         }
         const folderRow = target.closest('.folder-row');
-        if (folderRow) {
-            const folderId = folderRow.dataset.folderId;
-            await openFolder(folderId);
+        if (folderRow?.dataset.folderId) {
+            await openFolder(folderRow.dataset.folderId);
         }
     });
 }
-function rebuildParent(folder, parent = null) {
-    folder.parent = parent;
-    for (const sub of folder.subFolders) {
-        rebuildParent(sub, folder);
-    }
-}
-function findFolderById(folder, id) {
-    if (folder.id === id)
-        return folder;
-    for (const subFolder of folder.subFolders) {
-        const found = findFolderById(subFolder, id);
-        if (found)
-            return found;
-    }
-    return null;
-}
-function getFolderPath(folder) {
-    const path = [];
-    let current = folder;
-    while (current) {
-        path.unshift(current);
-        current = current.parent;
-    }
-    return path;
-}
-async function navigateToFolder(folder) {
-    (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.setLoading)('document-table-body', true, 'Opening folder...');
-    try {
-        await (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.delay)(500);
-        currentFolder = folder;
-        folderStack = getFolderPath(folder);
-        (0,_components_grid__WEBPACK_IMPORTED_MODULE_1__["default"])(currentFolder);
-        renderBreadcrumb();
-    }
-    finally {
-        (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.setLoading)('document-table-body', false);
-    }
-}
-window.addEventListener('popstate', async (event) => {
-    const folderId = event.state?.folderId;
-    if (!folderId) {
-        await navigateToFolder(rootFolder);
-        return;
-    }
-    const found = findFolderById(rootFolder, folderId);
-    if (!found) {
-        currentFolder = rootFolder;
-        folderStack = [rootFolder];
-        renderNotFoundState(folderId);
-        return;
-    }
-    await navigateToFolder(found);
-});
 async function openFolder(folderId) {
-    (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.setLoading)('document-table-body', true, 'Opening folder...');
+    const currentFolder = getCurrentFolder();
+    if (!currentFolder)
+        return;
     const folder = currentFolder.subFolders.find((f) => f.id === folderId);
     if (!folder)
         return;
     history.pushState({ folderId }, '', `?folder=${folderId}`);
-    await navigateToFolder(folder);
-}
-function renderBreadcrumb() {
-    const title = document.getElementById('document-breadcrumb-title');
-    if (!title)
-        return;
-    title.textContent = '';
-    folderStack.forEach((folder, index) => {
-        const label = folder.id === 'root' ? 'Documents' : folder.name;
-        if (index > 0) {
-            title.append(' > ');
-        }
-        const link = document.createElement('a');
-        link.href = '#';
-        link.className = 'text-reset text-decoration-none';
-        link.textContent = label;
-        link.onclick = async (e) => {
-            e.preventDefault();
-            history.pushState({ folderId: folder.id }, '', folder.id === 'root' ? '/' : `?folder=${folder.id}`);
-            await navigateToFolder(folder);
-        };
-        title.appendChild(link);
-    });
-}
-function isDuplicate(folder, name, extension, excludeId) {
-    const folderExists = folder.subFolders.some((f) => f.name === name && f.id !== excludeId);
-    if (folderExists)
-        return true;
-    const fileExists = folder.files.some((f) => f.name === name &&
-        (extension ? f.extension === extension : true) &&
-        f.id !== excludeId);
-    return fileExists;
-}
-async function createFolder() {
-    const result = await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_2__.openFormDialog)('Create Folder', [
-        {
-            name: 'folderName',
-            label: 'Folder Name',
-            placeholder: 'Enter folder name',
-        },
-    ], 'Create');
-    if (!result) {
-        return;
-    }
-    if (isDuplicate(currentFolder, result.folderName)) {
-        await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_2__.openConfirmDialog)('Duplicate Folder Name', 'A folder with this name already exists.', 'OK');
-        return;
-    }
-    const folderName = result.folderName;
-    (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.setLoading)('document-table-body', true, 'Creating folder...');
-    try {
-        await (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.delay)(1000);
-        const nowIso = new Date().toISOString();
-        const newFolder = {
-            id: crypto.randomUUID(),
-            name: folderName,
-            files: [],
-            parent: currentFolder,
-            subFolders: [],
-            createdAt: nowIso,
-            createdBy: 'Current User',
-            modifiedAt: nowIso,
-            modifiedBy: 'Current User',
-        };
-        currentFolder.subFolders.push(newFolder);
-        (0,_utilities_storage_util__WEBPACK_IMPORTED_MODULE_3__.saveToLocalStorage)(rootFolder);
-        (0,_components_grid__WEBPACK_IMPORTED_MODULE_1__["default"])(currentFolder);
-    }
-    finally {
-        (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.setLoading)('document-table-body', false);
-    }
-}
-async function createFile() {
-    const result = await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_2__.openFormDialog)('Create File', [
-        {
-            name: 'fileName',
-            label: 'File Name',
-            placeholder: 'Enter file name',
-        },
-        {
-            name: 'extension',
-            label: 'File Extension',
-            placeholder: 'xlsx, pdf, docx...',
-        },
-    ], 'Create');
-    if (!result) {
-        return;
-    }
-    if (isDuplicate(currentFolder, result.fileName, result.extension.replace('.', ''), result.id)) {
-        await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_2__.openConfirmDialog)('Duplicate File Name', 'A file with this name already exists.', 'OK');
-        return;
-    }
-    const fileName = result.fileName;
-    const extension = result.extension.replace('.', '');
-    (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.setLoading)('document-table-body', true, 'Creating file...');
-    try {
-        await (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.delay)(1000);
-        const nowIso = new Date().toISOString();
-        const newFile = {
-            id: crypto.randomUUID(),
-            name: fileName,
-            extension,
-            createdAt: nowIso,
-            createdBy: 'Current User',
-            modifiedAt: nowIso,
-            modifiedBy: 'Current User',
-        };
-        currentFolder.files.push(newFile);
-        (0,_utilities_storage_util__WEBPACK_IMPORTED_MODULE_3__.saveToLocalStorage)(rootFolder);
-        (0,_components_grid__WEBPACK_IMPORTED_MODULE_1__["default"])(currentFolder);
-    }
-    finally {
-        (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.setLoading)('document-table-body', false);
-    }
-}
-async function uploadFile(file) {
-    const extension = file.name.split('.').pop() || '';
-    const name = file.name.replace(`.${extension}`, '');
-    if (isDuplicate(currentFolder, name, extension)) {
-        await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_2__.openConfirmDialog)('Duplicate File Name', 'A file with this name already exists.', 'OK');
-        return;
-    }
-    (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.setLoading)('document-table-body', true, 'Uploading file...');
-    try {
-        await (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.delay)(1000);
-        const nowIso = new Date().toISOString();
-        const newFile = {
-            id: crypto.randomUUID(),
-            name: name,
-            extension,
-            createdAt: nowIso,
-            createdBy: 'Current User',
-            modifiedAt: nowIso,
-            modifiedBy: 'Current User',
-        };
-        currentFolder.files.push(newFile);
-        (0,_utilities_storage_util__WEBPACK_IMPORTED_MODULE_3__.saveToLocalStorage)(rootFolder);
-        (0,_components_grid__WEBPACK_IMPORTED_MODULE_1__["default"])(currentFolder);
-    }
-    finally {
-        (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.setLoading)('document-table-body', false);
-    }
-}
-async function deleteFolder(folderId) {
-    (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.setLoading)('document-table-body', true, 'Deleting folder...');
+    (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.setLoading)('document-table-body', true);
     try {
         await (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.delay)(500);
-        currentFolder.subFolders = currentFolder.subFolders.filter((folder) => folder.id !== folderId);
-        (0,_utilities_storage_util__WEBPACK_IMPORTED_MODULE_3__.saveToLocalStorage)(rootFolder);
-        (0,_components_grid__WEBPACK_IMPORTED_MODULE_1__["default"])(currentFolder);
-    }
-    finally {
-        (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.setLoading)('document-table-body', false);
-    }
-}
-async function deleteFile(fileId) {
-    (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.setLoading)('document-table-body', true, 'Deleting file...');
-    try {
-        await (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.delay)(500);
-        currentFolder.files = currentFolder.files.filter((file) => file.id !== fileId);
-        (0,_utilities_storage_util__WEBPACK_IMPORTED_MODULE_3__.saveToLocalStorage)(rootFolder);
-        (0,_components_grid__WEBPACK_IMPORTED_MODULE_1__["default"])(currentFolder);
-    }
-    finally {
-        (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.setLoading)('document-table-body', false);
-    }
-}
-async function editFolderName(folderId) {
-    const folder = currentFolder.subFolders.find((item) => item.id === folderId);
-    if (!folder) {
-        return;
-    }
-    const result = await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_2__.openFormDialog)('Rename Folder', [
-        {
-            name: 'folderName',
-            label: 'Folder Name',
-            value: folder.name,
-            placeholder: 'Enter folder name',
-        },
-    ], 'Save');
-    if (!result) {
-        return;
-    }
-    if (isDuplicate(currentFolder, result.folderName)) {
-        await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_2__.openConfirmDialog)('Duplicate Folder Name', 'A folder with this name already exists.', 'OK');
-        return;
-    }
-    const nextName = result.folderName;
-    (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.setLoading)('document-table-body', true, 'Renaming folder...');
-    try {
-        await (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.delay)(500);
-        folder.name = nextName;
-        folder.modifiedAt = new Date().toISOString();
-        folder.modifiedBy = 'Current User';
-        (0,_utilities_storage_util__WEBPACK_IMPORTED_MODULE_3__.saveToLocalStorage)(rootFolder);
-        (0,_components_grid__WEBPACK_IMPORTED_MODULE_1__["default"])(currentFolder);
-    }
-    finally {
-        (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.setLoading)('document-table-body', false);
-    }
-}
-async function editFileName(fileId) {
-    const file = currentFolder.files.find((item) => item.id === fileId);
-    if (!file) {
-        return;
-    }
-    const result = await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_2__.openFormDialog)('Rename File', [
-        {
-            name: 'fileName',
-            label: 'File Name',
-            value: file.name,
-            placeholder: 'Enter file name',
-        },
-    ], 'Save');
-    if (!result) {
-        return;
-    }
-    if (isDuplicate(currentFolder, result.fileName, result.extension, result.id)) {
-        await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_2__.openConfirmDialog)('Duplicate File Name', 'A file with this name already exists.', 'OK');
-        return;
-    }
-    const nextName = result.fileName;
-    (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.setLoading)('document-table-body', true, 'Renaming file...');
-    try {
-        await (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.delay)(500);
-        file.name = nextName;
-        file.modifiedAt = new Date().toISOString();
-        file.modifiedBy = 'Current User';
-        (0,_utilities_storage_util__WEBPACK_IMPORTED_MODULE_3__.saveToLocalStorage)(rootFolder);
-        (0,_components_grid__WEBPACK_IMPORTED_MODULE_1__["default"])(currentFolder);
+        await (0,_navigation_folder_navigation__WEBPACK_IMPORTED_MODULE_5__.navigateToFolder)(folder);
     }
     finally {
         (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.setLoading)('document-table-body', false);
