@@ -14,6 +14,7 @@ import { folderState } from '../state/folder.state';
 import {
   navigateToFolder,
   bindFolderPopState,
+  openFolderById,
 } from '../navigation/folder.navigation';
 import {
   createFolder,
@@ -26,14 +27,6 @@ import {
 } from '../services/folder.services';
 import { renderBreadcrumb } from '../components/_breadcrumb';
 import { renderNotFoundState } from '../components/_not-found';
-
-const getCurrentFolder = () => {
-  return folderState.currentFolder;
-};
-
-const getRootFolder = () => {
-  return folderState.rootFolder;
-};
 
 ready(async () => {
   setLoading('document-table-body', true, 'Loading documents...');
@@ -192,26 +185,7 @@ function bindActions() {
       '.folder-row',
     ) as HTMLElement | null;
     if (folderRow?.dataset.folderId) {
-      await openFolder(folderRow.dataset.folderId);
+      await openFolderById(folderRow.dataset.folderId);
     }
   });
-}
-
-async function openFolder(folderId: string) {
-  const currentFolder = getCurrentFolder();
-  if (!currentFolder) return;
-
-  const folder = currentFolder.subFolders.find(
-    (f) => f.id === folderId,
-  );
-  if (!folder) return;
-
-  history.pushState({ folderId }, '', `?folder=${folderId}`);
-  setLoading('document-table-body', true);
-  try {
-    await delay(500);
-    await navigateToFolder(folder);
-  } finally {
-    setLoading('document-table-body', false);
-  }
 }

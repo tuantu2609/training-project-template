@@ -1,10 +1,14 @@
 import { folderState } from '../state/folder.state';
-import { getFolderPath, findFolderById } from '../utilities/_helper';
+import {
+  getFolderPath,
+  findFolderById,
+  setLoading,
+  delay,
+} from '../utilities/_helper';
 import renderGrid from '../components/_grid';
 import { renderBreadcrumb } from '../components/_breadcrumb';
 import { FolderModel } from '../models/folder';
 import { renderNotFoundState } from '../components/_not-found';
-
 
 export async function navigateToFolder(folder: FolderModel) {
   folderState.currentFolder = folder;
@@ -37,4 +41,26 @@ export function bindFolderPopState() {
 
     await navigateToFolder(found);
   });
+}
+
+export async function openFolderById(folderId: string) {
+  const currentFolder = folderState.currentFolder;
+  if (!currentFolder) return;
+
+  const folder = currentFolder.subFolders.find(
+    (f) => f.id === folderId,
+  );
+
+  if (!folder) return;
+
+  history.pushState({ folderId }, '', `?folder=${folderId}`);
+
+  setLoading('document-table-body', true);
+
+  try {
+    await delay(500);
+    await navigateToFolder(folder);
+  } finally {
+    setLoading('document-table-body', false);
+  }
 }

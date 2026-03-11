@@ -7691,7 +7691,8 @@ const createMockFolderData = () => {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   bindFolderPopState: function() { return /* binding */ bindFolderPopState; },
-/* harmony export */   navigateToFolder: function() { return /* binding */ navigateToFolder; }
+/* harmony export */   navigateToFolder: function() { return /* binding */ navigateToFolder; },
+/* harmony export */   openFolderById: function() { return /* binding */ openFolderById; }
 /* harmony export */ });
 /* harmony import */ var _state_folder_state__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../state/folder.state */ "./src/scripts/state/folder.state.ts");
 /* harmony import */ var _utilities_helper__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utilities/_helper */ "./src/scripts/utilities/_helper.ts");
@@ -7728,6 +7729,23 @@ function bindFolderPopState() {
         }
         await navigateToFolder(found);
     });
+}
+async function openFolderById(folderId) {
+    const currentFolder = _state_folder_state__WEBPACK_IMPORTED_MODULE_0__.folderState.currentFolder;
+    if (!currentFolder)
+        return;
+    const folder = currentFolder.subFolders.find((f) => f.id === folderId);
+    if (!folder)
+        return;
+    history.pushState({ folderId }, '', `?folder=${folderId}`);
+    (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_1__.setLoading)('document-table-body', true);
+    try {
+        await (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_1__.delay)(500);
+        await navigateToFolder(folder);
+    }
+    finally {
+        (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_1__.setLoading)('document-table-body', false);
+    }
 }
 
 
@@ -8314,12 +8332,6 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-const getCurrentFolder = () => {
-    return _state_folder_state__WEBPACK_IMPORTED_MODULE_4__.folderState.currentFolder;
-};
-const getRootFolder = () => {
-    return _state_folder_state__WEBPACK_IMPORTED_MODULE_4__.folderState.rootFolder;
-};
 (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__["default"])(async () => {
     (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.setLoading)('document-table-body', true, 'Loading documents...');
     try {
@@ -8433,26 +8445,9 @@ function bindActions() {
         }
         const folderRow = target.closest('.folder-row');
         if (folderRow?.dataset.folderId) {
-            await openFolder(folderRow.dataset.folderId);
+            await (0,_navigation_folder_navigation__WEBPACK_IMPORTED_MODULE_5__.openFolderById)(folderRow.dataset.folderId);
         }
     });
-}
-async function openFolder(folderId) {
-    const currentFolder = getCurrentFolder();
-    if (!currentFolder)
-        return;
-    const folder = currentFolder.subFolders.find((f) => f.id === folderId);
-    if (!folder)
-        return;
-    history.pushState({ folderId }, '', `?folder=${folderId}`);
-    (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.setLoading)('document-table-body', true);
-    try {
-        await (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.delay)(500);
-        await (0,_navigation_folder_navigation__WEBPACK_IMPORTED_MODULE_5__.navigateToFolder)(folder);
-    }
-    finally {
-        (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.setLoading)('document-table-body', false);
-    }
 }
 
 }();
