@@ -7453,6 +7453,8 @@ function renderBreadcrumb() {
 /***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _utilities_date_util__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../utilities/date.util */ "./src/scripts/utilities/date.util.ts");
+
 const getFileIcon = (extension) => {
     const ext = extension.toLowerCase();
     if (['xls', 'xlsx', 'csv'].includes(ext))
@@ -7474,19 +7476,6 @@ const getFileIcon = (extension) => {
     }
     return { name: 'mdi:file-outline', className: '' };
 };
-const formatDisplayDate = (value) => {
-    if (!value) {
-        return '';
-    }
-    const parsedDate = new Date(value);
-    if (Number.isNaN(parsedDate.getTime())) {
-        return value;
-    }
-    return parsedDate.toLocaleDateString('en-US', {
-        month: 'long',
-        day: 'numeric',
-    });
-};
 const renderGrid = (folder) => {
     const tbody = document.getElementById('document-table-body');
     if (!tbody)
@@ -7507,7 +7496,7 @@ const renderGrid = (folder) => {
           <span class="name-value">${folder.name}</span>
         </td>
 
-        <td data-label="Modified" class="td-content">${formatDisplayDate(folder.modifiedAt)}</td>
+        <td data-label="Modified" class="td-content">${(0,_utilities_date_util__WEBPACK_IMPORTED_MODULE_0__.formatDisplayDate)(folder.modifiedAt)}</td>
         <td data-label="Modified By" class="td-content">${folder.modifiedBy}</td>
 
         <td class="text-end">
@@ -7543,7 +7532,7 @@ const renderGrid = (folder) => {
           </span>
         </td>
 
-        <td data-label="Modified" class="td-content">${formatDisplayDate(file.modifiedAt)}</td>
+        <td data-label="Modified" class="td-content">${(0,_utilities_date_util__WEBPACK_IMPORTED_MODULE_0__.formatDisplayDate)(file.modifiedAt)}</td>
         <td data-label="Modified By" class="td-content">${file.modifiedBy}</td>
 
         <td class="text-end">
@@ -8092,6 +8081,31 @@ function getFromLocalStorage() {
     const data = localStorage.getItem(STORAGE_KEY);
     return data ? JSON.parse(data) : null;
 }
+
+
+/***/ }),
+
+/***/ "./src/scripts/utilities/date.util.ts":
+/*!********************************************!*\
+  !*** ./src/scripts/utilities/date.util.ts ***!
+  \********************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   formatDisplayDate: function() { return /* binding */ formatDisplayDate; }
+/* harmony export */ });
+const formatDisplayDate = (value) => {
+    if (!value)
+        return '';
+    const parsedDate = new Date(value);
+    if (Number.isNaN(parsedDate.getTime()))
+        return value;
+    return parsedDate.toLocaleDateString('en-US', {
+        month: 'long',
+        day: 'numeric',
+    });
+};
 
 
 /***/ }),

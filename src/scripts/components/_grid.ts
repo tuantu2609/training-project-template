@@ -1,4 +1,5 @@
 import { FolderModel } from '../models/folder';
+import { formatDisplayDate } from '../utilities/date.util';
 
 const getFileIcon = (
   extension: string,
@@ -24,22 +25,6 @@ const getFileIcon = (
   }
 
   return { name: 'mdi:file-outline', className: '' };
-};
-
-const formatDisplayDate = (value: string): string => {
-  if (!value) {
-    return '';
-  }
-
-  const parsedDate = new Date(value);
-  if (Number.isNaN(parsedDate.getTime())) {
-    return value;
-  }
-
-  return parsedDate.toLocaleDateString('en-US', {
-    month: 'long',
-    day: 'numeric',
-  });
 };
 
 const renderGrid = (folder: FolderModel) => {
