@@ -1,5 +1,5 @@
 import { folderState } from '../state/folder.state';
-import { navigateToFolder } from '../navigation/folder.navigation';
+import { updateFolderView } from '../navigation/folder.navigation';
 
 export function renderBreadcrumb() {
   const title = document.getElementById('document-breadcrumb-title');
@@ -28,7 +28,7 @@ export function renderBreadcrumb() {
         folder.id === 'root' ? '/' : `?folder=${folder.id}`,
       );
 
-      await navigateToFolder(folder);
+      await updateFolderView(folder);
     };
 
     title.appendChild(link);

@@ -10,7 +10,7 @@ import { renderBreadcrumb } from '../components/_breadcrumb';
 import { FolderModel } from '../models/folder';
 import { renderNotFoundState } from '../components/_not-found';
 
-export async function navigateToFolder(folder: FolderModel) {
+export async function updateFolderView(folder: FolderModel) {
   folderState.currentFolder = folder;
   folderState.folderStack = getFolderPath(folder);
 
@@ -26,7 +26,7 @@ export function bindFolderPopState() {
     const folderId = event.state?.folderId;
 
     if (!folderId) {
-      await navigateToFolder(rootFolder);
+      await updateFolderView(rootFolder);
       return;
     }
 
@@ -39,7 +39,7 @@ export function bindFolderPopState() {
       return;
     }
 
-    await navigateToFolder(found);
+    await updateFolderView(found);
   });
 }
 
@@ -59,7 +59,7 @@ export async function openFolderById(folderId: string) {
 
   try {
     await delay(500);
-    await navigateToFolder(folder);
+    await updateFolderView(folder);
   } finally {
     setLoading('document-table-body', false);
   }

@@ -7437,7 +7437,7 @@ function renderBreadcrumb() {
         link.onclick = async (e) => {
             e.preventDefault();
             history.pushState({ folderId: folder.id }, '', folder.id === 'root' ? '/' : `?folder=${folder.id}`);
-            await (0,_navigation_folder_navigation__WEBPACK_IMPORTED_MODULE_1__.navigateToFolder)(folder);
+            await (0,_navigation_folder_navigation__WEBPACK_IMPORTED_MODULE_1__.updateFolderView)(folder);
         };
         title.appendChild(link);
     });
@@ -7641,8 +7641,8 @@ const createMockFolderData = () => {
         files: [
             {
                 id: 'file-5',
-                name: 'RevenueByServices2016',
-                extension: 'xlsx',
+                name: 'wowwowwow',
+                extension: 'pdf',
                 createdAt: nowIso,
                 createdBy: 'Admin',
                 modifiedAt: nowIso,
@@ -7650,8 +7650,26 @@ const createMockFolderData = () => {
             },
             {
                 id: 'file-6',
-                name: 'RevenueByServices2017',
-                extension: 'xlsx',
+                name: 'thunder',
+                extension: 'docx',
+                createdAt: nowIso,
+                createdBy: 'Admin',
+                modifiedAt: nowIso,
+                modifiedBy: 'Administrator MOD',
+            },
+            {
+                id: 'file-7',
+                name: 'justforfun',
+                extension: 'pptx',
+                createdAt: nowIso,
+                createdBy: 'Admin',
+                modifiedAt: nowIso,
+                modifiedBy: 'Administrator MOD',
+            },
+            {
+                id: 'file-8',
+                name: 'blabla',
+                extension: 'xyz',
                 createdAt: nowIso,
                 createdBy: 'Admin',
                 modifiedAt: nowIso,
@@ -7680,8 +7698,8 @@ const createMockFolderData = () => {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   bindFolderPopState: function() { return /* binding */ bindFolderPopState; },
-/* harmony export */   navigateToFolder: function() { return /* binding */ navigateToFolder; },
-/* harmony export */   openFolderById: function() { return /* binding */ openFolderById; }
+/* harmony export */   openFolderById: function() { return /* binding */ openFolderById; },
+/* harmony export */   updateFolderView: function() { return /* binding */ updateFolderView; }
 /* harmony export */ });
 /* harmony import */ var _state_folder_state__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../state/folder.state */ "./src/scripts/state/folder.state.ts");
 /* harmony import */ var _utilities_helper__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utilities/_helper */ "./src/scripts/utilities/_helper.ts");
@@ -7693,7 +7711,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-async function navigateToFolder(folder) {
+async function updateFolderView(folder) {
     _state_folder_state__WEBPACK_IMPORTED_MODULE_0__.folderState.currentFolder = folder;
     _state_folder_state__WEBPACK_IMPORTED_MODULE_0__.folderState.folderStack = (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_1__.getFolderPath)(folder);
     (0,_components_grid__WEBPACK_IMPORTED_MODULE_2__["default"])(folder);
@@ -7706,7 +7724,7 @@ function bindFolderPopState() {
             return;
         const folderId = event.state?.folderId;
         if (!folderId) {
-            await navigateToFolder(rootFolder);
+            await updateFolderView(rootFolder);
             return;
         }
         const found = (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_1__.findFolderById)(rootFolder, folderId);
@@ -7716,7 +7734,7 @@ function bindFolderPopState() {
             (0,_components_not_found__WEBPACK_IMPORTED_MODULE_4__.renderNotFoundState)(folderId);
             return;
         }
-        await navigateToFolder(found);
+        await updateFolderView(found);
     });
 }
 async function openFolderById(folderId) {
@@ -7730,7 +7748,7 @@ async function openFolderById(folderId) {
     (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_1__.setLoading)('document-table-body', true);
     try {
         await (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_1__.delay)(500);
-        await navigateToFolder(folder);
+        await updateFolderView(folder);
     }
     finally {
         (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_1__.setLoading)('document-table-body', false);
@@ -8372,7 +8390,7 @@ __webpack_require__.r(__webpack_exports__);
         else {
             _state_folder_state__WEBPACK_IMPORTED_MODULE_4__.folderState.currentFolder = _state_folder_state__WEBPACK_IMPORTED_MODULE_4__.folderState.rootFolder;
         }
-        await (0,_navigation_folder_navigation__WEBPACK_IMPORTED_MODULE_5__.navigateToFolder)(_state_folder_state__WEBPACK_IMPORTED_MODULE_4__.folderState.currentFolder);
+        await (0,_navigation_folder_navigation__WEBPACK_IMPORTED_MODULE_5__.updateFolderView)(_state_folder_state__WEBPACK_IMPORTED_MODULE_4__.folderState.currentFolder);
         bindActions();
         (0,_navigation_folder_navigation__WEBPACK_IMPORTED_MODULE_5__.bindFolderPopState)();
     }

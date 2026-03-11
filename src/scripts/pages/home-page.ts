@@ -12,7 +12,7 @@ import { openConfirmDialog } from '../utilities/dialog.util';
 import { createMockFolderData } from '../data/folder.data';
 import { folderState } from '../state/folder.state';
 import {
-  navigateToFolder,
+  updateFolderView,
   bindFolderPopState,
   openFolderById,
 } from '../navigation/folder.navigation';
@@ -64,7 +64,7 @@ ready(async () => {
       folderState.currentFolder = folderState.rootFolder;
     }
 
-    await navigateToFolder(folderState.currentFolder);
+    await updateFolderView(folderState.currentFolder);
     bindActions();
     bindFolderPopState();
   } finally {

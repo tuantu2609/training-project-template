@@ -129,7 +129,7 @@ iconify-icon {
   }
   .table-custom tr {
     margin-bottom: 2rem;
-    border: 1px solid #e1dfdd;
+    border: 1px solid #e0e0e0;
   }
   .table-custom td {
     display: grid;
@@ -274,7 +274,7 @@ iconify-icon {
   --bs-highlight-bg: rgb(255, 242.6, 205.4);
   --bs-border-width: 1px;
   --bs-border-style: solid;
-  --bs-border-color: #dee2e6;
+  --bs-border-color: #e0e0e0;
   --bs-border-color-translucent: rgba(0, 0, 0, 0.175);
   --bs-border-radius: 0.375rem;
   --bs-border-radius-sm: 0.25rem;
