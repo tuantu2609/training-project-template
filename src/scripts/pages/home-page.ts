@@ -16,15 +16,7 @@ import {
   bindFolderPopState,
   openFolderById,
 } from '../navigation/folder.navigation';
-import {
-  createFolder,
-  createFile,
-  deleteFile,
-  deleteFolder,
-  editFileName,
-  editFolderName,
-  uploadFile,
-} from '../services/folder.services';
+import { folderService } from '../services/folder.services';
 import { renderBreadcrumb } from '../components/_breadcrumb';
 import { renderNotFoundState } from '../components/_not-found';
 
@@ -85,12 +77,12 @@ function bindActions() {
 
   createFolderButton?.addEventListener('click', async (event) => {
     event.preventDefault();
-    await createFolder();
+    await folderService.createFolder();
   });
 
   createFileButton?.addEventListener('click', async (event) => {
     event.preventDefault();
-    await createFile();
+    await folderService.createFile();
   });
 
   uploadFileButton?.addEventListener('click', (event) => {
@@ -102,7 +94,7 @@ function bindActions() {
     const file = fileInput.files?.[0];
     if (!file) return;
 
-    void uploadFile(file);
+    void folderService.uploadFile(file);
     fileInput.value = '';
   });
 
@@ -142,11 +134,11 @@ function bindActions() {
       const folderId = editBtn.dataset.folderId;
 
       if (fileId) {
-        await editFileName(fileId);
+        await folderService.editFileName(fileId);
       }
 
       if (folderId) {
-        await editFolderName(folderId);
+        await folderService.editFolderName(folderId);
       }
 
       return;
@@ -164,7 +156,7 @@ function bindActions() {
         );
         if (!confirmed) return;
 
-        await deleteFile(fileId);
+        await folderService.deleteFile(fileId);
       }
 
       if (folderId) {
@@ -175,7 +167,7 @@ function bindActions() {
         );
         if (!confirmed) return;
 
-        await deleteFolder(folderId);
+        await folderService.deleteFolder(folderId);
       }
 
       return;

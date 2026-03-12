@@ -18,7 +18,7 @@ const getFileIcon = (
   if (ext === 'pdf')
     return { name: 'vscode-icons:file-type-pdf2', className: '' };
   if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'].includes(ext)) {
-    return { name: 'lets-icons:img-box-fill', className: '' };
+    return { name: 'fluent-color:image-48', className: '' };
   }
   if (['zip', 'rar', '7z', 'tar', 'gz'].includes(ext)) {
     return { name: 'vscode-icons:file-type-zip', className: '' };

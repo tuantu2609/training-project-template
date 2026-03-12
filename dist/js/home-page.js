@@ -7469,7 +7469,7 @@ const getFileIcon = (extension) => {
     if (ext === 'pdf')
         return { name: 'vscode-icons:file-type-pdf2', className: '' };
     if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'].includes(ext)) {
-        return { name: 'lets-icons:img-box-fill', className: '' };
+        return { name: 'fluent-color:image-48', className: '' };
     }
     if (['zip', 'rar', '7z', 'tar', 'gz'].includes(ext)) {
         return { name: 'vscode-icons:file-type-zip', className: '' };
@@ -7766,13 +7766,7 @@ async function openFolderById(folderId) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   createFile: function() { return /* binding */ createFile; },
-/* harmony export */   createFolder: function() { return /* binding */ createFolder; },
-/* harmony export */   deleteFile: function() { return /* binding */ deleteFile; },
-/* harmony export */   deleteFolder: function() { return /* binding */ deleteFolder; },
-/* harmony export */   editFileName: function() { return /* binding */ editFileName; },
-/* harmony export */   editFolderName: function() { return /* binding */ editFolderName; },
-/* harmony export */   uploadFile: function() { return /* binding */ uploadFile; }
+/* harmony export */   folderService: function() { return /* binding */ folderService; }
 /* harmony export */ });
 /* harmony import */ var _state_folder_state__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../state/folder.state */ "./src/scripts/state/folder.state.ts");
 /* harmony import */ var _components_grid__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../components/_grid */ "./src/scripts/components/_grid.ts");
@@ -7786,184 +7780,208 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-const getCurrentFolder = () => _state_folder_state__WEBPACK_IMPORTED_MODULE_0__.folderState.currentFolder;
-const getRootFolder = () => _state_folder_state__WEBPACK_IMPORTED_MODULE_0__.folderState.rootFolder;
-async function createFolder() {
-    const currentFolder = getCurrentFolder();
-    const rootFolder = getRootFolder();
-    if (!currentFolder || !rootFolder)
-        return;
-    const result = await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_5__.openFormDialog)('Create Folder', [{ name: 'folderName', label: 'Folder Name', placeholder: 'Enter folder name' }], 'Create');
-    if (!result)
-        return;
-    if ((0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.isDuplicate)(currentFolder, result.folderName)) {
-        await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_5__.openConfirmDialog)('Duplicate Folder Name', 'A folder with this name already exists.', 'OK');
-        return;
+class FolderService {
+    get currentFolder() {
+        return _state_folder_state__WEBPACK_IMPORTED_MODULE_0__.folderState.currentFolder;
     }
-    (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.setLoading)('document-table-body', true, 'Creating folder...');
-    try {
-        await (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.delay)(500);
-        const nowIso = new Date().toISOString();
-        currentFolder.subFolders.push({
-            id: crypto.randomUUID(),
-            name: result.folderName,
-            files: [],
-            parent: currentFolder,
-            subFolders: [],
-            createdAt: nowIso,
-            createdBy: 'Current User',
-            modifiedAt: nowIso,
-            modifiedBy: 'Current User',
-        });
-        (0,_utilities_storage_util__WEBPACK_IMPORTED_MODULE_4__.saveToLocalStorage)(rootFolder);
-        (0,_components_grid__WEBPACK_IMPORTED_MODULE_1__["default"])(currentFolder);
+    get rootFolder() {
+        return _state_folder_state__WEBPACK_IMPORTED_MODULE_0__.folderState.rootFolder;
     }
-    finally {
-        (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.setLoading)('document-table-body', false);
+    save() {
+        if (this.rootFolder) {
+            (0,_utilities_storage_util__WEBPACK_IMPORTED_MODULE_4__.saveToLocalStorage)(this.rootFolder);
+        }
+    }
+    refresh() {
+        if (this.currentFolder) {
+            (0,_components_grid__WEBPACK_IMPORTED_MODULE_1__["default"])(this.currentFolder);
+        }
+    }
+    async createFolder() {
+        if (!this.currentFolder || !this.rootFolder)
+            return;
+        const result = await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_5__.openFormDialog)('Create Folder', [
+            {
+                name: 'folderName',
+                label: 'Folder Name',
+                placeholder: 'Enter folder name',
+            },
+        ], 'Create');
+        if (!result)
+            return;
+        if ((0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.isDuplicate)(this.currentFolder, result.folderName)) {
+            await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_5__.openConfirmDialog)('Duplicate Folder Name', 'A folder with this name already exists.', 'OK');
+            return;
+        }
+        (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.setLoading)('document-table-body', true, 'Creating folder...');
+        try {
+            await (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.delay)(500);
+            const nowIso = new Date().toISOString();
+            this.currentFolder.subFolders.push({
+                id: crypto.randomUUID(),
+                name: result.folderName,
+                files: [],
+                parent: this.currentFolder,
+                subFolders: [],
+                createdAt: nowIso,
+                createdBy: 'Current User',
+                modifiedAt: nowIso,
+                modifiedBy: 'Current User',
+            });
+            this.save();
+            this.refresh();
+        }
+        finally {
+            (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.setLoading)('document-table-body', false);
+        }
+    }
+    async createFile() {
+        if (!this.currentFolder || !this.rootFolder)
+            return;
+        const result = await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_5__.openFormDialog)('Create File', [
+            {
+                name: 'fileName',
+                label: 'File Name',
+                placeholder: 'Enter file name',
+            },
+            {
+                name: 'extension',
+                label: 'File Extension',
+                placeholder: 'xlsx, pdf...',
+            },
+        ], 'Create');
+        if (!result)
+            return;
+        const extension = result.extension.replace('.', '');
+        if ((0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.isDuplicate)(this.currentFolder, result.fileName, extension)) {
+            await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_5__.openConfirmDialog)('Duplicate File Name', 'A file with this name already exists.', 'OK');
+            return;
+        }
+        (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.setLoading)('document-table-body', true, 'Creating file...');
+        try {
+            await (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.delay)(500);
+            const nowIso = new Date().toISOString();
+            const newFile = {
+                id: crypto.randomUUID(),
+                name: result.fileName,
+                extension,
+                createdAt: nowIso,
+                createdBy: 'Current User',
+                modifiedAt: nowIso,
+                modifiedBy: 'Current User',
+            };
+            this.currentFolder.files.push(newFile);
+            this.save();
+            this.refresh();
+        }
+        finally {
+            (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.setLoading)('document-table-body', false);
+        }
+    }
+    async deleteFile(fileId) {
+        if (!this.currentFolder || !this.rootFolder)
+            return;
+        (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.setLoading)('document-table-body', true, 'Deleting file...');
+        try {
+            await (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.delay)(300);
+            this.currentFolder.files = this.currentFolder.files.filter((file) => file.id !== fileId);
+            this.save();
+            this.refresh();
+        }
+        finally {
+            (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.setLoading)('document-table-body', false);
+        }
+    }
+    async deleteFolder(folderId) {
+        if (!this.currentFolder || !this.rootFolder)
+            return;
+        (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.setLoading)('document-table-body', true, 'Deleting folder...');
+        try {
+            await (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.delay)(300);
+            this.currentFolder.subFolders =
+                this.currentFolder.subFolders.filter((folder) => folder.id !== folderId);
+            this.save();
+            this.refresh();
+        }
+        finally {
+            (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.setLoading)('document-table-body', false);
+        }
+    }
+    async editFolderName(folderId) {
+        if (!this.currentFolder || !this.rootFolder)
+            return;
+        const folder = this.currentFolder.subFolders.find((f) => f.id === folderId);
+        if (!folder)
+            return;
+        const result = await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_5__.openFormDialog)('Rename Folder', [
+            {
+                name: 'folderName',
+                label: 'Folder Name',
+                value: folder.name,
+            },
+        ], 'Save');
+        if (!result)
+            return;
+        if ((0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.isDuplicate)(this.currentFolder, result.folderName, undefined, folder.id)) {
+            await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_5__.openConfirmDialog)('Duplicate Folder Name', 'A folder with this name already exists.', 'OK');
+            return;
+        }
+        folder.name = result.folderName;
+        folder.modifiedAt = new Date().toISOString();
+        this.save();
+        this.refresh();
+        (0,_components_breadcrumb__WEBPACK_IMPORTED_MODULE_2__.renderBreadcrumb)();
+    }
+    async editFileName(fileId) {
+        if (!this.currentFolder || !this.rootFolder)
+            return;
+        const file = this.currentFolder.files.find((f) => f.id === fileId);
+        if (!file)
+            return;
+        const result = await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_5__.openFormDialog)('Rename File', [{ name: 'fileName', label: 'File Name', value: file.name }], 'Save');
+        if (!result)
+            return;
+        if ((0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.isDuplicate)(this.currentFolder, result.fileName, file.extension, file.id)) {
+            await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_5__.openConfirmDialog)('Duplicate File Name', 'A file with this name already exists.', 'OK');
+            return;
+        }
+        file.name = result.fileName;
+        file.modifiedAt = new Date().toISOString();
+        this.save();
+        this.refresh();
+    }
+    async uploadFile(file) {
+        if (!this.currentFolder || !this.rootFolder)
+            return;
+        const extension = file.name.split('.').pop() || '';
+        const name = file.name.replace(`.${extension}`, '');
+        if ((0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.isDuplicate)(this.currentFolder, name, extension)) {
+            await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_5__.openConfirmDialog)('Duplicate File Name', 'A file with this name already exists.', 'OK');
+            return;
+        }
+        (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.setLoading)('document-table-body', true, 'Uploading file...');
+        try {
+            await (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.delay)(500);
+            const nowIso = new Date().toISOString();
+            const newFile = {
+                id: crypto.randomUUID(),
+                name,
+                extension,
+                createdAt: nowIso,
+                createdBy: 'Current User',
+                modifiedAt: nowIso,
+                modifiedBy: 'Current User',
+            };
+            this.currentFolder.files.push(newFile);
+            this.save();
+            this.refresh();
+        }
+        finally {
+            (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.setLoading)('document-table-body', false);
+        }
     }
 }
-async function createFile() {
-    const currentFolder = getCurrentFolder();
-    const rootFolder = getRootFolder();
-    if (!currentFolder || !rootFolder)
-        return;
-    const result = await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_5__.openFormDialog)('Create File', [
-        { name: 'fileName', label: 'File Name', placeholder: 'Enter file name' },
-        { name: 'extension', label: 'File Extension', placeholder: 'xlsx, pdf...' },
-    ], 'Create');
-    if (!result)
-        return;
-    const extension = result.extension.replace('.', '');
-    if ((0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.isDuplicate)(currentFolder, result.fileName, extension)) {
-        await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_5__.openConfirmDialog)('Duplicate File Name', 'A file with this name already exists.', 'OK');
-        return;
-    }
-    (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.setLoading)('document-table-body', true, 'Creating file...');
-    try {
-        await (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.delay)(500);
-        const nowIso = new Date().toISOString();
-        const newFile = {
-            id: crypto.randomUUID(),
-            name: result.fileName,
-            extension,
-            createdAt: nowIso,
-            createdBy: 'Current User',
-            modifiedAt: nowIso,
-            modifiedBy: 'Current User',
-        };
-        currentFolder.files.push(newFile);
-        (0,_utilities_storage_util__WEBPACK_IMPORTED_MODULE_4__.saveToLocalStorage)(rootFolder);
-        (0,_components_grid__WEBPACK_IMPORTED_MODULE_1__["default"])(currentFolder);
-    }
-    finally {
-        (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.setLoading)('document-table-body', false);
-    }
-}
-async function deleteFile(fileId) {
-    const currentFolder = getCurrentFolder();
-    const rootFolder = getRootFolder();
-    if (!currentFolder || !rootFolder)
-        return;
-    (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.setLoading)('document-table-body', true, 'Deleting file...');
-    try {
-        await (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.delay)(300);
-        currentFolder.files = currentFolder.files.filter((file) => file.id !== fileId);
-        (0,_utilities_storage_util__WEBPACK_IMPORTED_MODULE_4__.saveToLocalStorage)(rootFolder);
-        (0,_components_grid__WEBPACK_IMPORTED_MODULE_1__["default"])(currentFolder);
-    }
-    finally {
-        (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.setLoading)('document-table-body', false);
-    }
-}
-async function deleteFolder(folderId) {
-    const currentFolder = getCurrentFolder();
-    const rootFolder = getRootFolder();
-    if (!currentFolder || !rootFolder)
-        return;
-    (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.setLoading)('document-table-body', true, 'Deleting folder...');
-    try {
-        await (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.delay)(300);
-        currentFolder.subFolders = currentFolder.subFolders.filter((folder) => folder.id !== folderId);
-        (0,_utilities_storage_util__WEBPACK_IMPORTED_MODULE_4__.saveToLocalStorage)(rootFolder);
-        (0,_components_grid__WEBPACK_IMPORTED_MODULE_1__["default"])(currentFolder);
-    }
-    finally {
-        (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.setLoading)('document-table-body', false);
-    }
-}
-async function editFolderName(folderId) {
-    const currentFolder = getCurrentFolder();
-    const rootFolder = getRootFolder();
-    if (!currentFolder || !rootFolder)
-        return;
-    const folder = currentFolder.subFolders.find(f => f.id === folderId);
-    if (!folder)
-        return;
-    const result = await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_5__.openFormDialog)('Rename Folder', [{ name: 'folderName', label: 'Folder Name', value: folder.name }], 'Save');
-    if (!result)
-        return;
-    if ((0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.isDuplicate)(currentFolder, result.folderName, undefined, folder.id)) {
-        await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_5__.openConfirmDialog)('Duplicate Folder Name', 'A folder with this name already exists.', 'OK');
-        return;
-    }
-    folder.name = result.folderName;
-    folder.modifiedAt = new Date().toISOString();
-    (0,_utilities_storage_util__WEBPACK_IMPORTED_MODULE_4__.saveToLocalStorage)(rootFolder);
-    (0,_components_grid__WEBPACK_IMPORTED_MODULE_1__["default"])(currentFolder);
-    (0,_components_breadcrumb__WEBPACK_IMPORTED_MODULE_2__.renderBreadcrumb)();
-}
-async function editFileName(fileId) {
-    const currentFolder = getCurrentFolder();
-    const rootFolder = getRootFolder();
-    if (!currentFolder || !rootFolder)
-        return;
-    const file = currentFolder.files.find(f => f.id === fileId);
-    if (!file)
-        return;
-    const result = await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_5__.openFormDialog)('Rename File', [{ name: 'fileName', label: 'File Name', value: file.name }], 'Save');
-    if (!result)
-        return;
-    if ((0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.isDuplicate)(currentFolder, result.fileName, file.extension, file.id)) {
-        await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_5__.openConfirmDialog)('Duplicate File Name', 'A file with this name already exists.', 'OK');
-        return;
-    }
-    file.name = result.fileName;
-    file.modifiedAt = new Date().toISOString();
-    (0,_utilities_storage_util__WEBPACK_IMPORTED_MODULE_4__.saveToLocalStorage)(rootFolder);
-    (0,_components_grid__WEBPACK_IMPORTED_MODULE_1__["default"])(currentFolder);
-}
-async function uploadFile(file) {
-    const currentFolder = getCurrentFolder();
-    const rootFolder = getRootFolder();
-    if (!currentFolder || !rootFolder)
-        return;
-    const extension = file.name.split('.').pop() || '';
-    const name = file.name.replace(`.${extension}`, '');
-    if ((0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.isDuplicate)(currentFolder, name, extension)) {
-        await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_5__.openConfirmDialog)('Duplicate File Name', 'A file with this name already exists.', 'OK');
-        return;
-    }
-    (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.setLoading)('document-table-body', true, 'Uploading file...');
-    try {
-        await (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.delay)(500);
-        const nowIso = new Date().toISOString();
-        const newFile = {
-            id: crypto.randomUUID(),
-            name,
-            extension,
-            createdAt: nowIso,
-            createdBy: 'Current User',
-            modifiedAt: nowIso,
-            modifiedBy: 'Current User',
-        };
-        currentFolder.files.push(newFile);
-        (0,_utilities_storage_util__WEBPACK_IMPORTED_MODULE_4__.saveToLocalStorage)(rootFolder);
-        (0,_components_grid__WEBPACK_IMPORTED_MODULE_1__["default"])(currentFolder);
-    }
-    finally {
-        (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.setLoading)('document-table-body', false);
-    }
-}
+const folderService = new FolderService();
 
 
 /***/ }),
@@ -8406,11 +8424,11 @@ function bindActions() {
     const fileInput = document.getElementById('file-input');
     createFolderButton?.addEventListener('click', async (event) => {
         event.preventDefault();
-        await (0,_services_folder_services__WEBPACK_IMPORTED_MODULE_6__.createFolder)();
+        await _services_folder_services__WEBPACK_IMPORTED_MODULE_6__.folderService.createFolder();
     });
     createFileButton?.addEventListener('click', async (event) => {
         event.preventDefault();
-        await (0,_services_folder_services__WEBPACK_IMPORTED_MODULE_6__.createFile)();
+        await _services_folder_services__WEBPACK_IMPORTED_MODULE_6__.folderService.createFile();
     });
     uploadFileButton?.addEventListener('click', (event) => {
         event.preventDefault();
@@ -8420,7 +8438,7 @@ function bindActions() {
         const file = fileInput.files?.[0];
         if (!file)
             return;
-        void (0,_services_folder_services__WEBPACK_IMPORTED_MODULE_6__.uploadFile)(file);
+        void _services_folder_services__WEBPACK_IMPORTED_MODULE_6__.folderService.uploadFile(file);
         fileInput.value = '';
     });
     document.addEventListener('change', (e) => {
@@ -8451,10 +8469,10 @@ function bindActions() {
             const fileId = editBtn.dataset.fileId;
             const folderId = editBtn.dataset.folderId;
             if (fileId) {
-                await (0,_services_folder_services__WEBPACK_IMPORTED_MODULE_6__.editFileName)(fileId);
+                await _services_folder_services__WEBPACK_IMPORTED_MODULE_6__.folderService.editFileName(fileId);
             }
             if (folderId) {
-                await (0,_services_folder_services__WEBPACK_IMPORTED_MODULE_6__.editFolderName)(folderId);
+                await _services_folder_services__WEBPACK_IMPORTED_MODULE_6__.folderService.editFolderName(folderId);
             }
             return;
         }
@@ -8465,13 +8483,13 @@ function bindActions() {
                 const confirmed = await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_2__.openConfirmDialog)('Delete File', 'Are you sure you want to delete this file?', 'Delete');
                 if (!confirmed)
                     return;
-                await (0,_services_folder_services__WEBPACK_IMPORTED_MODULE_6__.deleteFile)(fileId);
+                await _services_folder_services__WEBPACK_IMPORTED_MODULE_6__.folderService.deleteFile(fileId);
             }
             if (folderId) {
                 const confirmed = await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_2__.openConfirmDialog)('Delete Folder', 'Are you sure you want to delete this folder?', 'Delete');
                 if (!confirmed)
                     return;
-                await (0,_services_folder_services__WEBPACK_IMPORTED_MODULE_6__.deleteFolder)(folderId);
+                await _services_folder_services__WEBPACK_IMPORTED_MODULE_6__.folderService.deleteFolder(folderId);
             }
             return;
         }
