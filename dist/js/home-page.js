@@ -8299,6 +8299,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _base_dialog__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./base-dialog */ "./src/scripts/utilities/dialogs/base-dialog.ts");
 
+function validateInput(value) {
+    return /^[A-Za-z0-9 _-]+$/.test(value);
+}
 class FormDialog extends _base_dialog__WEBPACK_IMPORTED_MODULE_0__.BaseDialog {
     constructor(title, fields) {
         super();
@@ -8358,6 +8361,13 @@ class FormDialog extends _base_dialog__WEBPACK_IMPORTED_MODULE_0__.BaseDialog {
                 if (!values[field.name]) {
                     if (error) {
                         error.textContent = `${field.label} is required`;
+                        error.classList.remove('d-none');
+                    }
+                    return;
+                }
+                if (!validateInput(values[field.name])) {
+                    if (error) {
+                        error.textContent = `${field.label} contains invalid characters`;
                         error.classList.remove('d-none');
                     }
                     return;

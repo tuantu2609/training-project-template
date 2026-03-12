@@ -1,6 +1,10 @@
 import { BaseDialog } from './base-dialog';
 import { FormField } from '../../models/form';
 
+function validateInput(value: string): boolean {
+  return /^[A-Za-z0-9 _-]+$/.test(value);
+}
+
 export class FormDialog extends BaseDialog<Record<string, string>> {
   constructor(
     private title: string,
@@ -71,6 +75,14 @@ export class FormDialog extends BaseDialog<Record<string, string>> {
           if (!values[field.name]) {
             if (error) {
               error.textContent = `${field.label} is required`;
+              error.classList.remove('d-none');
+            }
+            return;
+          }
+
+          if (!validateInput(values[field.name])) {
+            if (error) {
+              error.textContent = `${field.label} contains invalid characters`;
               error.classList.remove('d-none');
             }
             return;
