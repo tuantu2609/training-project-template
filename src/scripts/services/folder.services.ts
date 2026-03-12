@@ -4,10 +4,9 @@ import renderGrid from '../components/_grid';
 import { renderBreadcrumb } from '../components/_breadcrumb';
 import { delay, setLoading, isDuplicate } from '../utilities/_helper';
 import { saveToLocalStorage } from '../utilities/_storage.util';
-import {
-  openConfirmDialog,
-  openFormDialog,
-} from '../utilities/dialog.util';
+
+import { FormDialog } from '../utilities/dialogs/form-dialog';
+import { ConfirmDuplicateDialog } from '../utilities/dialogs/confirm-dialog';
 
 class FolderService {
   private get currentFolder() {
@@ -33,26 +32,17 @@ class FolderService {
   public async createFolder() {
     if (!this.currentFolder || !this.rootFolder) return;
 
-    const result = await openFormDialog(
-      'Create Folder',
-      [
-        {
-          name: 'folderName',
-          label: 'Folder Name',
-          placeholder: 'Enter folder name',
-        },
-      ],
-      'Create',
-    );
+    const dialog = new FormDialog('Create Folder', [
+      { name: 'name', label: 'Folder name' },
+    ]);
+
+    const result = await dialog.open();
 
     if (!result) return;
 
-    if (isDuplicate(this.currentFolder, result.folderName)) {
-      await openConfirmDialog(
-        'Duplicate Folder Name',
-        'A folder with this name already exists.',
-        'OK',
-      );
+    if (isDuplicate(this.currentFolder, result.name)) {
+      const dialog = new ConfirmDuplicateDialog();
+      await dialog.open();
       return;
     }
 
@@ -65,7 +55,7 @@ class FolderService {
 
       this.currentFolder.subFolders.push({
         id: crypto.randomUUID(),
-        name: result.folderName,
+        name: result.name,
         files: [],
         parent: this.currentFolder,
         subFolders: [],
@@ -85,33 +75,20 @@ class FolderService {
   public async createFile() {
     if (!this.currentFolder || !this.rootFolder) return;
 
-    const result = await openFormDialog(
-      'Create File',
-      [
-        {
-          name: 'fileName',
-          label: 'File Name',
-          placeholder: 'Enter file name',
-        },
-        {
-          name: 'extension',
-          label: 'File Extension',
-          placeholder: 'xlsx, pdf...',
-        },
-      ],
-      'Create',
-    );
+    const dialog = new FormDialog('Create File', [
+      { name: 'name', label: 'File name', placeholder: 'Enter file name' },
+      { name: 'extension', label: 'File extension', placeholder: 'xlsx, pdf...' },
+    ]);
+
+    const result = await dialog.open();
 
     if (!result) return;
 
     const extension = result.extension.replace('.', '');
 
     if (isDuplicate(this.currentFolder, result.fileName, extension)) {
-      await openConfirmDialog(
-        'Duplicate File Name',
-        'A file with this name already exists.',
-        'OK',
-      );
+      const dialog = new ConfirmDuplicateDialog();
+      await dialog.open();
       return;
     }
 
@@ -124,7 +101,7 @@ class FolderService {
 
       const newFile: FileModel = {
         id: crypto.randomUUID(),
-        name: result.fileName,
+        name: result.name,
         extension,
         createdAt: nowIso,
         createdBy: 'Current User',
@@ -188,37 +165,30 @@ class FolderService {
     );
     if (!folder) return;
 
-    const result = await openFormDialog(
-      'Rename Folder',
-      [
-        {
-          name: 'folderName',
-          label: 'Folder Name',
-          value: folder.name,
-        },
-      ],
-      'Save',
-    );
+    const dialog = new FormDialog('Rename Folder', [
+      { name: 'name', label: 'Folder name', value: folder.name},
+    ]);
+
+    const result = await dialog.open();
+
+    console.log(result);
 
     if (!result) return;
 
     if (
       isDuplicate(
         this.currentFolder,
-        result.folderName,
+        result.name,
         undefined,
         folder.id,
       )
     ) {
-      await openConfirmDialog(
-        'Duplicate Folder Name',
-        'A folder with this name already exists.',
-        'OK',
-      );
+      const dialog = new ConfirmDuplicateDialog();
+      await dialog.open();
       return;
     }
 
-    folder.name = result.folderName;
+    folder.name = result.name;
     folder.modifiedAt = new Date().toISOString();
 
     this.save();
@@ -234,27 +204,24 @@ class FolderService {
     );
     if (!file) return;
 
-    const result = await openFormDialog(
-      'Rename File',
-      [{ name: 'fileName', label: 'File Name', value: file.name }],
-      'Save',
-    );
+    const dialog = new FormDialog('Rename File', [
+      { name: 'name', label: 'File name', value: file.name},
+    ]);
+
+    const result = await dialog.open();
 
     if (!result) return;
 
     if (
       isDuplicate(
         this.currentFolder,
-        result.fileName,
+        result.name,
         file.extension,
         file.id,
       )
     ) {
-      await openConfirmDialog(
-        'Duplicate File Name',
-        'A file with this name already exists.',
-        'OK',
-      );
+      const dialog = new ConfirmDuplicateDialog();
+      await dialog.open();
       return;
     }
 
@@ -272,11 +239,8 @@ class FolderService {
     const name = file.name.replace(`.${extension}`, '');
 
     if (isDuplicate(this.currentFolder, name, extension)) {
-      await openConfirmDialog(
-        'Duplicate File Name',
-        'A file with this name already exists.',
-        'OK',
-      );
+      const dialog = new ConfirmDuplicateDialog();
+      await dialog.open();
       return;
     }
 

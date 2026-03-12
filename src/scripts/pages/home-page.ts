@@ -8,7 +8,6 @@ import {
   saveToLocalStorage,
   getFromLocalStorage,
 } from '../utilities/_storage.util';
-import { openConfirmDialog } from '../utilities/dialog.util';
 import { createMockFolderData } from '../data/folder.data';
 import { folderState } from '../state/folder.state';
 import {
@@ -19,6 +18,7 @@ import {
 import { folderService } from '../services/folder.services';
 import { renderBreadcrumb } from '../components/_breadcrumb';
 import { renderNotFoundState } from '../components/_not-found';
+import { ConfirmDeleteDialog } from '../utilities/dialogs/confirm-dialog';
 
 ready(async () => {
   setLoading('document-table-body', true, 'Loading documents...');
@@ -149,22 +149,16 @@ function bindActions() {
       const folderId = deleteBtn.dataset.folderId;
 
       if (fileId) {
-        const confirmed = await openConfirmDialog(
-          'Delete File',
-          'Are you sure you want to delete this file?',
-          'Delete',
-        );
+        const dialog = new ConfirmDeleteDialog();
+        const confirmed = await dialog.open();
         if (!confirmed) return;
 
         await folderService.deleteFile(fileId);
       }
 
       if (folderId) {
-        const confirmed = await openConfirmDialog(
-          'Delete Folder',
-          'Are you sure you want to delete this folder?',
-          'Delete',
-        );
+        const dialog = new ConfirmDeleteDialog();
+        const confirmed = await dialog.open();
         if (!confirmed) return;
 
         await folderService.deleteFolder(folderId);

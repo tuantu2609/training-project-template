@@ -52,8 +52,8 @@ export function rebuildParent(
 
   for (const sub of folder.subFolders) {
     rebuildParent(sub, folder);
+    }
   }
-}
 
 export function findFolderById(
   folder: FolderModel,

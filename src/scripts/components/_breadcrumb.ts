@@ -1,5 +1,6 @@
 import { folderState } from '../state/folder.state';
 import { updateFolderView } from '../navigation/folder.navigation';
+import { delay, setLoading } from '../utilities/_helper';
 
 export function renderBreadcrumb() {
   const title = document.getElementById('document-breadcrumb-title');
@@ -28,7 +29,14 @@ export function renderBreadcrumb() {
         folder.id === 'root' ? '/' : `?folder=${folder.id}`,
       );
 
-      await updateFolderView(folder);
+      setLoading('document-table-body', true);
+
+      try {
+        await delay(500);
+        await updateFolderView(folder);
+      } finally {
+        setLoading('document-table-body', false);
+      }
     };
 
     title.appendChild(link);

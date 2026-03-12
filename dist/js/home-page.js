@@ -7418,6 +7418,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _state_folder_state__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../state/folder.state */ "./src/scripts/state/folder.state.ts");
 /* harmony import */ var _navigation_folder_navigation__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../navigation/folder.navigation */ "./src/scripts/navigation/folder.navigation.ts");
+/* harmony import */ var _utilities_helper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../utilities/_helper */ "./src/scripts/utilities/_helper.ts");
+
 
 
 function renderBreadcrumb() {
@@ -7437,7 +7439,14 @@ function renderBreadcrumb() {
         link.onclick = async (e) => {
             e.preventDefault();
             history.pushState({ folderId: folder.id }, '', folder.id === 'root' ? '/' : `?folder=${folder.id}`);
-            await (0,_navigation_folder_navigation__WEBPACK_IMPORTED_MODULE_1__.updateFolderView)(folder);
+            (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_2__.setLoading)('document-table-body', true);
+            try {
+                await (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_2__.delay)(500);
+                await (0,_navigation_folder_navigation__WEBPACK_IMPORTED_MODULE_1__.updateFolderView)(folder);
+            }
+            finally {
+                (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_2__.setLoading)('document-table-body', false);
+            }
         };
         title.appendChild(link);
     });
@@ -7773,7 +7782,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _components_breadcrumb__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../components/_breadcrumb */ "./src/scripts/components/_breadcrumb.ts");
 /* harmony import */ var _utilities_helper__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../utilities/_helper */ "./src/scripts/utilities/_helper.ts");
 /* harmony import */ var _utilities_storage_util__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../utilities/_storage.util */ "./src/scripts/utilities/_storage.util.ts");
-/* harmony import */ var _utilities_dialog_util__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../utilities/dialog.util */ "./src/scripts/utilities/dialog.util.ts");
+/* harmony import */ var _utilities_dialogs_form_dialog__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../utilities/dialogs/form-dialog */ "./src/scripts/utilities/dialogs/form-dialog.ts");
+/* harmony import */ var _utilities_dialogs_confirm_dialog__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../utilities/dialogs/confirm-dialog */ "./src/scripts/utilities/dialogs/confirm-dialog.ts");
+
 
 
 
@@ -7800,17 +7811,15 @@ class FolderService {
     async createFolder() {
         if (!this.currentFolder || !this.rootFolder)
             return;
-        const result = await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_5__.openFormDialog)('Create Folder', [
-            {
-                name: 'folderName',
-                label: 'Folder Name',
-                placeholder: 'Enter folder name',
-            },
-        ], 'Create');
+        const dialog = new _utilities_dialogs_form_dialog__WEBPACK_IMPORTED_MODULE_5__.FormDialog('Create Folder', [
+            { name: 'name', label: 'Folder name' },
+        ]);
+        const result = await dialog.open();
         if (!result)
             return;
-        if ((0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.isDuplicate)(this.currentFolder, result.folderName)) {
-            await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_5__.openConfirmDialog)('Duplicate Folder Name', 'A folder with this name already exists.', 'OK');
+        if ((0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.isDuplicate)(this.currentFolder, result.name)) {
+            const dialog = new _utilities_dialogs_confirm_dialog__WEBPACK_IMPORTED_MODULE_6__.ConfirmDuplicateDialog();
+            await dialog.open();
             return;
         }
         (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.setLoading)('document-table-body', true, 'Creating folder...');
@@ -7819,7 +7828,7 @@ class FolderService {
             const nowIso = new Date().toISOString();
             this.currentFolder.subFolders.push({
                 id: crypto.randomUUID(),
-                name: result.folderName,
+                name: result.name,
                 files: [],
                 parent: this.currentFolder,
                 subFolders: [],
@@ -7838,23 +7847,17 @@ class FolderService {
     async createFile() {
         if (!this.currentFolder || !this.rootFolder)
             return;
-        const result = await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_5__.openFormDialog)('Create File', [
-            {
-                name: 'fileName',
-                label: 'File Name',
-                placeholder: 'Enter file name',
-            },
-            {
-                name: 'extension',
-                label: 'File Extension',
-                placeholder: 'xlsx, pdf...',
-            },
-        ], 'Create');
+        const dialog = new _utilities_dialogs_form_dialog__WEBPACK_IMPORTED_MODULE_5__.FormDialog('Create File', [
+            { name: 'name', label: 'File name', placeholder: 'Enter file name' },
+            { name: 'extension', label: 'File extension', placeholder: 'xlsx, pdf...' },
+        ]);
+        const result = await dialog.open();
         if (!result)
             return;
         const extension = result.extension.replace('.', '');
         if ((0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.isDuplicate)(this.currentFolder, result.fileName, extension)) {
-            await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_5__.openConfirmDialog)('Duplicate File Name', 'A file with this name already exists.', 'OK');
+            const dialog = new _utilities_dialogs_confirm_dialog__WEBPACK_IMPORTED_MODULE_6__.ConfirmDuplicateDialog();
+            await dialog.open();
             return;
         }
         (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.setLoading)('document-table-body', true, 'Creating file...');
@@ -7863,7 +7866,7 @@ class FolderService {
             const nowIso = new Date().toISOString();
             const newFile = {
                 id: crypto.randomUUID(),
-                name: result.fileName,
+                name: result.name,
                 extension,
                 createdAt: nowIso,
                 createdBy: 'Current User',
@@ -7913,20 +7916,19 @@ class FolderService {
         const folder = this.currentFolder.subFolders.find((f) => f.id === folderId);
         if (!folder)
             return;
-        const result = await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_5__.openFormDialog)('Rename Folder', [
-            {
-                name: 'folderName',
-                label: 'Folder Name',
-                value: folder.name,
-            },
-        ], 'Save');
+        const dialog = new _utilities_dialogs_form_dialog__WEBPACK_IMPORTED_MODULE_5__.FormDialog('Rename Folder', [
+            { name: 'name', label: 'Folder name', value: folder.name },
+        ]);
+        const result = await dialog.open();
+        console.log(result);
         if (!result)
             return;
-        if ((0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.isDuplicate)(this.currentFolder, result.folderName, undefined, folder.id)) {
-            await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_5__.openConfirmDialog)('Duplicate Folder Name', 'A folder with this name already exists.', 'OK');
+        if ((0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.isDuplicate)(this.currentFolder, result.name, undefined, folder.id)) {
+            const dialog = new _utilities_dialogs_confirm_dialog__WEBPACK_IMPORTED_MODULE_6__.ConfirmDuplicateDialog();
+            await dialog.open();
             return;
         }
-        folder.name = result.folderName;
+        folder.name = result.name;
         folder.modifiedAt = new Date().toISOString();
         this.save();
         this.refresh();
@@ -7938,11 +7940,15 @@ class FolderService {
         const file = this.currentFolder.files.find((f) => f.id === fileId);
         if (!file)
             return;
-        const result = await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_5__.openFormDialog)('Rename File', [{ name: 'fileName', label: 'File Name', value: file.name }], 'Save');
+        const dialog = new _utilities_dialogs_form_dialog__WEBPACK_IMPORTED_MODULE_5__.FormDialog('Rename File', [
+            { name: 'name', label: 'File name', value: file.name },
+        ]);
+        const result = await dialog.open();
         if (!result)
             return;
-        if ((0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.isDuplicate)(this.currentFolder, result.fileName, file.extension, file.id)) {
-            await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_5__.openConfirmDialog)('Duplicate File Name', 'A file with this name already exists.', 'OK');
+        if ((0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.isDuplicate)(this.currentFolder, result.name, file.extension, file.id)) {
+            const dialog = new _utilities_dialogs_confirm_dialog__WEBPACK_IMPORTED_MODULE_6__.ConfirmDuplicateDialog();
+            await dialog.open();
             return;
         }
         file.name = result.fileName;
@@ -7956,7 +7962,8 @@ class FolderService {
         const extension = file.name.split('.').pop() || '';
         const name = file.name.replace(`.${extension}`, '');
         if ((0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.isDuplicate)(this.currentFolder, name, extension)) {
-            await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_5__.openConfirmDialog)('Duplicate File Name', 'A file with this name already exists.', 'OK');
+            const dialog = new _utilities_dialogs_confirm_dialog__WEBPACK_IMPORTED_MODULE_6__.ConfirmDuplicateDialog();
+            await dialog.open();
             return;
         }
         (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_3__.setLoading)('document-table-body', true, 'Uploading file...');
@@ -8146,79 +8153,160 @@ const formatDisplayDate = (value) => {
 
 /***/ }),
 
-/***/ "./src/scripts/utilities/dialog.util.ts":
-/*!**********************************************!*\
-  !*** ./src/scripts/utilities/dialog.util.ts ***!
-  \**********************************************/
+/***/ "./src/scripts/utilities/dialogs/base-dialog.ts":
+/*!******************************************************!*\
+  !*** ./src/scripts/utilities/dialogs/base-dialog.ts ***!
+  \******************************************************/
 /***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   openConfirmDialog: function() { return /* binding */ openConfirmDialog; },
-/* harmony export */   openFormDialog: function() { return /* binding */ openFormDialog; }
+/* harmony export */   BaseDialog: function() { return /* binding */ BaseDialog; }
 /* harmony export */ });
 /* harmony import */ var bootstrap__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! bootstrap */ "./node_modules/bootstrap/dist/js/bootstrap.esm.js");
 
 const { Modal } = __webpack_require__(/*! bootstrap */ "./node_modules/bootstrap/dist/js/bootstrap.esm.js");
-function openConfirmDialog(title, message, confirmText = 'OK') {
-    return new Promise((resolve) => {
-        const dialogId = `confirm-dialog-${crypto.randomUUID()}`;
-        let result = false;
-        const html = `
-    <div class="modal fade" id="${dialogId}">
-    <div class="modal-dialog">
+class BaseDialog {
+    constructor() {
+        this.dialogId = `dialog-${crypto.randomUUID()}`;
+        this.result = null;
+    }
+    async open() {
+        return new Promise((resolve) => {
+            const html = this.render();
+            document.body.insertAdjacentHTML('beforeend', html);
+            this.element = document.getElementById(this.dialogId);
+            this.modal = new Modal(this.element);
+            this.bindEvents();
+            this.element.addEventListener('hidden.bs.modal', () => {
+                this.element.remove();
+                resolve(this.result);
+            });
+            this.modal.show();
+        });
+    }
+    close(result) {
+        this.result = result;
+        this.modal.hide();
+    }
+}
+
+
+/***/ }),
+
+/***/ "./src/scripts/utilities/dialogs/confirm-dialog.ts":
+/*!*********************************************************!*\
+  !*** ./src/scripts/utilities/dialogs/confirm-dialog.ts ***!
+  \*********************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   ConfirmDeleteDialog: function() { return /* binding */ ConfirmDeleteDialog; },
+/* harmony export */   ConfirmDuplicateDialog: function() { return /* binding */ ConfirmDuplicateDialog; }
+/* harmony export */ });
+/* harmony import */ var _base_dialog__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./base-dialog */ "./src/scripts/utilities/dialogs/base-dialog.ts");
+
+class ConfirmDeleteDialog extends _base_dialog__WEBPACK_IMPORTED_MODULE_0__.BaseDialog {
+    render() {
+        return `
+    <div class="modal fade" id="${this.dialogId}">
+      <div class="modal-dialog">
         <div class="modal-content">
 
-        <div class="modal-header">
-            <h5 class="modal-title">${title}</h5>
+          <div class="modal-header">
+            <h5 class="modal-title">Delete Item</h5>
             <button class="btn-close"></button>
-        </div>
+          </div>
 
-        <div class="modal-body">
-            <p>${message}</p>
-        </div>
+          <div class="modal-body">
+            <p>Are you sure you want to delete this?</p>
+          </div>
 
-        <div class="modal-footer">
+          <div class="modal-footer">
             <button class="btn btn-light btn-cancel">Cancel</button>
-            <button class="btn btn-dark btn-confirm">${confirmText}</button>
-        </div>
+            <button class="btn btn-dark btn-confirm">Delete</button>
+          </div>
 
         </div>
-    </div>
+      </div>
     </div>
     `;
-        document.body.insertAdjacentHTML('beforeend', html);
-        const form = document.getElementById(dialogId);
-        const modal = new Modal(form);
-        const closeBtn = form.querySelector('.btn-close');
-        form
-            .querySelector('.btn-cancel')
-            ?.addEventListener('click', () => {
-            result = false;
-            modal.hide();
-        });
-        closeBtn?.addEventListener('click', () => {
-            result = false;
-            modal.hide();
-        });
-        form
+    }
+    bindEvents() {
+        this.element
             .querySelector('.btn-confirm')
-            ?.addEventListener('click', () => {
-            result = true;
-            modal.hide();
-        });
-        form.addEventListener('hidden.bs.modal', () => {
-            form.remove();
-            resolve(result);
-        });
-        modal.show();
-    });
+            ?.addEventListener('click', () => this.close(true));
+        this.element
+            .querySelector('.btn-cancel')
+            ?.addEventListener('click', () => this.close(false));
+        this.element
+            .querySelector('.btn-close')
+            ?.addEventListener('click', () => this.close(false));
+    }
 }
-function openFormDialog(title, fields, submitText = 'Save') {
-    return new Promise((resolve) => {
-        const dialogId = `form-dialog-${crypto.randomUUID()}`;
-        let result = null;
-        const body = fields
+class ConfirmDuplicateDialog extends _base_dialog__WEBPACK_IMPORTED_MODULE_0__.BaseDialog {
+    render() {
+        return `
+    <div class="modal fade" id="${this.dialogId}">
+      <div class="modal-dialog">
+        <div class="modal-content">
+
+          <div class="modal-header">
+            <h5 class="modal-title">Duplicate Item</h5>
+            <button class="btn-close"></button>
+          </div>
+
+          <div class="modal-body">
+            <p>A file with this name already exists.</p>
+          </div>
+
+          <div class="modal-footer">
+            <button class="btn btn-light btn-cancel">Cancel</button>
+            <button class="btn btn-dark btn-confirm">OK</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+    `;
+    }
+    bindEvents() {
+        this.element
+            .querySelector('.btn-confirm')
+            ?.addEventListener('click', () => this.close(true));
+        this.element
+            .querySelector('.btn-cancel')
+            ?.addEventListener('click', () => this.close(false));
+        this.element
+            .querySelector('.btn-close')
+            ?.addEventListener('click', () => this.close(false));
+    }
+}
+
+
+/***/ }),
+
+/***/ "./src/scripts/utilities/dialogs/form-dialog.ts":
+/*!******************************************************!*\
+  !*** ./src/scripts/utilities/dialogs/form-dialog.ts ***!
+  \******************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   FormDialog: function() { return /* binding */ FormDialog; }
+/* harmony export */ });
+/* harmony import */ var _base_dialog__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./base-dialog */ "./src/scripts/utilities/dialogs/base-dialog.ts");
+
+class FormDialog extends _base_dialog__WEBPACK_IMPORTED_MODULE_0__.BaseDialog {
+    constructor(title, fields) {
+        super();
+        this.title = title;
+        this.fields = fields;
+    }
+    render() {
+        const body = this.fields
             .map((f) => `
         <div class="mb-3">
           <label class="form-label">${f.label}</label>
@@ -8231,13 +8319,13 @@ function openFormDialog(title, fields, submitText = 'Save') {
         </div>
       `)
             .join('');
-        const html = `
-    <div class="modal fade" id="${dialogId}">
+        return `
+    <div class="modal fade" id="${this.dialogId}">
       <div class="modal-dialog">
         <div class="modal-content">
 
           <div class="modal-header">
-            <h5 class="modal-title">${title}</h5>
+            <h5 class="modal-title">${this.title}</h5>
             <button class="btn-close"></button>
           </div>
 
@@ -8248,47 +8336,42 @@ function openFormDialog(title, fields, submitText = 'Save') {
 
           <div class="modal-footer">
             <button class="btn btn-light btn-cancel">Cancel</button>
-            <button class="btn btn-dark btn-submit">${submitText}</button>
+            <button class="btn btn-dark btn-submit">Save</button>
           </div>
 
         </div>
       </div>
     </div>
     `;
-        document.body.insertAdjacentHTML('beforeend', html);
-        const form = document.getElementById(dialogId);
-        const modal = new Modal(form);
-        const errorMessage = form.querySelector('.dialog-error');
-        form.querySelector('.btn-cancel')?.addEventListener('click', () => {
-            modal.hide();
-        });
-        form.querySelector('.btn-close')?.addEventListener('click', () => {
-            modal.hide();
-        });
-        form.querySelector('.btn-submit')?.addEventListener('click', () => {
+    }
+    bindEvents() {
+        const error = this.element.querySelector('.dialog-error');
+        this.element
+            .querySelector('.btn-submit')
+            ?.addEventListener('click', () => {
             const values = {};
-            const inputs = form.querySelectorAll('.dialog-input');
+            const inputs = this.element.querySelectorAll('.dialog-input');
             inputs.forEach((input) => {
                 values[input.dataset.name] = input.value.trim();
             });
-            for (const field of fields) {
+            for (const field of this.fields) {
                 if (!values[field.name]) {
-                    if (errorMessage) {
-                        errorMessage.textContent = `${field.label} is required`;
-                        errorMessage.classList.remove('d-none');
+                    if (error) {
+                        error.textContent = `${field.label} is required`;
+                        error.classList.remove('d-none');
                     }
                     return;
                 }
             }
-            result = values;
-            modal.hide();
+            this.close(values);
         });
-        form.addEventListener('hidden.bs.modal', () => {
-            form.remove();
-            resolve(result);
-        });
-        modal.show();
-    });
+        this.element
+            .querySelector('.btn-cancel')
+            ?.addEventListener('click', () => this.close(null));
+        this.element
+            .querySelector('.btn-close')
+            ?.addEventListener('click', () => this.close(null));
+    }
 }
 
 
@@ -8366,13 +8449,13 @@ var __webpack_exports__ = {};
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _utilities_helper__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../utilities/_helper */ "./src/scripts/utilities/_helper.ts");
 /* harmony import */ var _utilities_storage_util__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utilities/_storage.util */ "./src/scripts/utilities/_storage.util.ts");
-/* harmony import */ var _utilities_dialog_util__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../utilities/dialog.util */ "./src/scripts/utilities/dialog.util.ts");
-/* harmony import */ var _data_folder_data__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../data/folder.data */ "./src/scripts/data/folder.data.ts");
-/* harmony import */ var _state_folder_state__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../state/folder.state */ "./src/scripts/state/folder.state.ts");
-/* harmony import */ var _navigation_folder_navigation__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../navigation/folder.navigation */ "./src/scripts/navigation/folder.navigation.ts");
-/* harmony import */ var _services_folder_services__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../services/folder.services */ "./src/scripts/services/folder.services.ts");
-/* harmony import */ var _components_breadcrumb__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../components/_breadcrumb */ "./src/scripts/components/_breadcrumb.ts");
-/* harmony import */ var _components_not_found__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../components/_not-found */ "./src/scripts/components/_not-found.ts");
+/* harmony import */ var _data_folder_data__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../data/folder.data */ "./src/scripts/data/folder.data.ts");
+/* harmony import */ var _state_folder_state__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../state/folder.state */ "./src/scripts/state/folder.state.ts");
+/* harmony import */ var _navigation_folder_navigation__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../navigation/folder.navigation */ "./src/scripts/navigation/folder.navigation.ts");
+/* harmony import */ var _services_folder_services__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../services/folder.services */ "./src/scripts/services/folder.services.ts");
+/* harmony import */ var _components_breadcrumb__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../components/_breadcrumb */ "./src/scripts/components/_breadcrumb.ts");
+/* harmony import */ var _components_not_found__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../components/_not-found */ "./src/scripts/components/_not-found.ts");
+/* harmony import */ var _utilities_dialogs_confirm_dialog__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../utilities/dialogs/confirm-dialog */ "./src/scripts/utilities/dialogs/confirm-dialog.ts");
 
 
 
@@ -8387,30 +8470,30 @@ __webpack_require__.r(__webpack_exports__);
     try {
         await (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.delay)(1000);
         const data = (0,_utilities_storage_util__WEBPACK_IMPORTED_MODULE_1__.getFromLocalStorage)();
-        _state_folder_state__WEBPACK_IMPORTED_MODULE_4__.folderState.rootFolder = data || (0,_data_folder_data__WEBPACK_IMPORTED_MODULE_3__.createMockFolderData)();
+        _state_folder_state__WEBPACK_IMPORTED_MODULE_3__.folderState.rootFolder = data || (0,_data_folder_data__WEBPACK_IMPORTED_MODULE_2__.createMockFolderData)();
         if (!data) {
-            (0,_utilities_storage_util__WEBPACK_IMPORTED_MODULE_1__.saveToLocalStorage)(_state_folder_state__WEBPACK_IMPORTED_MODULE_4__.folderState.rootFolder);
+            (0,_utilities_storage_util__WEBPACK_IMPORTED_MODULE_1__.saveToLocalStorage)(_state_folder_state__WEBPACK_IMPORTED_MODULE_3__.folderState.rootFolder);
         }
-        (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.rebuildParent)(_state_folder_state__WEBPACK_IMPORTED_MODULE_4__.folderState.rootFolder, null);
+        (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.rebuildParent)(_state_folder_state__WEBPACK_IMPORTED_MODULE_3__.folderState.rootFolder, null);
         const folderId = new URL(window.location.href).searchParams.get('folder');
         if (folderId) {
-            const folder = (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.findFolderById)(_state_folder_state__WEBPACK_IMPORTED_MODULE_4__.folderState.rootFolder, folderId);
+            const folder = (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.findFolderById)(_state_folder_state__WEBPACK_IMPORTED_MODULE_3__.folderState.rootFolder, folderId);
             if (!folder) {
-                _state_folder_state__WEBPACK_IMPORTED_MODULE_4__.folderState.currentFolder = _state_folder_state__WEBPACK_IMPORTED_MODULE_4__.folderState.rootFolder;
-                _state_folder_state__WEBPACK_IMPORTED_MODULE_4__.folderState.folderStack = [_state_folder_state__WEBPACK_IMPORTED_MODULE_4__.folderState.rootFolder];
-                (0,_components_breadcrumb__WEBPACK_IMPORTED_MODULE_7__.renderBreadcrumb)();
-                (0,_components_not_found__WEBPACK_IMPORTED_MODULE_8__.renderNotFoundState)(folderId);
+                _state_folder_state__WEBPACK_IMPORTED_MODULE_3__.folderState.currentFolder = _state_folder_state__WEBPACK_IMPORTED_MODULE_3__.folderState.rootFolder;
+                _state_folder_state__WEBPACK_IMPORTED_MODULE_3__.folderState.folderStack = [_state_folder_state__WEBPACK_IMPORTED_MODULE_3__.folderState.rootFolder];
+                (0,_components_breadcrumb__WEBPACK_IMPORTED_MODULE_6__.renderBreadcrumb)();
+                (0,_components_not_found__WEBPACK_IMPORTED_MODULE_7__.renderNotFoundState)(folderId);
                 bindActions();
                 return;
             }
-            _state_folder_state__WEBPACK_IMPORTED_MODULE_4__.folderState.currentFolder = folder;
+            _state_folder_state__WEBPACK_IMPORTED_MODULE_3__.folderState.currentFolder = folder;
         }
         else {
-            _state_folder_state__WEBPACK_IMPORTED_MODULE_4__.folderState.currentFolder = _state_folder_state__WEBPACK_IMPORTED_MODULE_4__.folderState.rootFolder;
+            _state_folder_state__WEBPACK_IMPORTED_MODULE_3__.folderState.currentFolder = _state_folder_state__WEBPACK_IMPORTED_MODULE_3__.folderState.rootFolder;
         }
-        await (0,_navigation_folder_navigation__WEBPACK_IMPORTED_MODULE_5__.updateFolderView)(_state_folder_state__WEBPACK_IMPORTED_MODULE_4__.folderState.currentFolder);
+        await (0,_navigation_folder_navigation__WEBPACK_IMPORTED_MODULE_4__.updateFolderView)(_state_folder_state__WEBPACK_IMPORTED_MODULE_3__.folderState.currentFolder);
         bindActions();
-        (0,_navigation_folder_navigation__WEBPACK_IMPORTED_MODULE_5__.bindFolderPopState)();
+        (0,_navigation_folder_navigation__WEBPACK_IMPORTED_MODULE_4__.bindFolderPopState)();
     }
     finally {
         (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_0__.setLoading)('document-table-body', false);
@@ -8424,11 +8507,11 @@ function bindActions() {
     const fileInput = document.getElementById('file-input');
     createFolderButton?.addEventListener('click', async (event) => {
         event.preventDefault();
-        await _services_folder_services__WEBPACK_IMPORTED_MODULE_6__.folderService.createFolder();
+        await _services_folder_services__WEBPACK_IMPORTED_MODULE_5__.folderService.createFolder();
     });
     createFileButton?.addEventListener('click', async (event) => {
         event.preventDefault();
-        await _services_folder_services__WEBPACK_IMPORTED_MODULE_6__.folderService.createFile();
+        await _services_folder_services__WEBPACK_IMPORTED_MODULE_5__.folderService.createFile();
     });
     uploadFileButton?.addEventListener('click', (event) => {
         event.preventDefault();
@@ -8438,7 +8521,7 @@ function bindActions() {
         const file = fileInput.files?.[0];
         if (!file)
             return;
-        void _services_folder_services__WEBPACK_IMPORTED_MODULE_6__.folderService.uploadFile(file);
+        void _services_folder_services__WEBPACK_IMPORTED_MODULE_5__.folderService.uploadFile(file);
         fileInput.value = '';
     });
     document.addEventListener('change', (e) => {
@@ -8469,10 +8552,10 @@ function bindActions() {
             const fileId = editBtn.dataset.fileId;
             const folderId = editBtn.dataset.folderId;
             if (fileId) {
-                await _services_folder_services__WEBPACK_IMPORTED_MODULE_6__.folderService.editFileName(fileId);
+                await _services_folder_services__WEBPACK_IMPORTED_MODULE_5__.folderService.editFileName(fileId);
             }
             if (folderId) {
-                await _services_folder_services__WEBPACK_IMPORTED_MODULE_6__.folderService.editFolderName(folderId);
+                await _services_folder_services__WEBPACK_IMPORTED_MODULE_5__.folderService.editFolderName(folderId);
             }
             return;
         }
@@ -8480,22 +8563,24 @@ function bindActions() {
             const fileId = deleteBtn.dataset.fileId;
             const folderId = deleteBtn.dataset.folderId;
             if (fileId) {
-                const confirmed = await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_2__.openConfirmDialog)('Delete File', 'Are you sure you want to delete this file?', 'Delete');
+                const dialog = new _utilities_dialogs_confirm_dialog__WEBPACK_IMPORTED_MODULE_8__.ConfirmDeleteDialog();
+                const confirmed = await dialog.open();
                 if (!confirmed)
                     return;
-                await _services_folder_services__WEBPACK_IMPORTED_MODULE_6__.folderService.deleteFile(fileId);
+                await _services_folder_services__WEBPACK_IMPORTED_MODULE_5__.folderService.deleteFile(fileId);
             }
             if (folderId) {
-                const confirmed = await (0,_utilities_dialog_util__WEBPACK_IMPORTED_MODULE_2__.openConfirmDialog)('Delete Folder', 'Are you sure you want to delete this folder?', 'Delete');
+                const dialog = new _utilities_dialogs_confirm_dialog__WEBPACK_IMPORTED_MODULE_8__.ConfirmDeleteDialog();
+                const confirmed = await dialog.open();
                 if (!confirmed)
                     return;
-                await _services_folder_services__WEBPACK_IMPORTED_MODULE_6__.folderService.deleteFolder(folderId);
+                await _services_folder_services__WEBPACK_IMPORTED_MODULE_5__.folderService.deleteFolder(folderId);
             }
             return;
         }
         const folderRow = target.closest('.folder-row');
         if (folderRow?.dataset.folderId) {
-            await (0,_navigation_folder_navigation__WEBPACK_IMPORTED_MODULE_5__.openFolderById)(folderRow.dataset.folderId);
+            await (0,_navigation_folder_navigation__WEBPACK_IMPORTED_MODULE_4__.openFolderById)(folderRow.dataset.folderId);
         }
     });
 }
